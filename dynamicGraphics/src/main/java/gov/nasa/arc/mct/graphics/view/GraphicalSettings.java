@@ -28,6 +28,7 @@ import gov.nasa.arc.mct.graphics.brush.Brush;
 import gov.nasa.arc.mct.graphics.brush.ClippedFill;
 import gov.nasa.arc.mct.graphics.brush.ConditionalBrush;
 import gov.nasa.arc.mct.graphics.brush.Fill;
+import gov.nasa.arc.mct.graphics.brush.ImageBrush;
 import gov.nasa.arc.mct.graphics.brush.Outline;
 import gov.nasa.arc.mct.graphics.brush.ScalingFill;
 import gov.nasa.arc.mct.graphics.clip.AxisClip;
@@ -35,10 +36,15 @@ import gov.nasa.arc.mct.graphics.shape.RegularPolygon;
 import gov.nasa.arc.mct.graphics.state.StateSensitive;
 
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,6 +55,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import javax.imageio.ImageIO;
 
 /**
  * Manages the settings for a GraphicalManifestation
@@ -231,9 +239,9 @@ public class GraphicalSettings {
 	 * @return a list of brushes
 	 */
 	public List<Brush> getLayers() {
+		boolean hasGraphic = false;
 		List<Brush> brushes = new ArrayList<Brush>();
 		
-		brushes.add(new Fill((Color) getSetting(GRAPHICAL_BACKGROUND_COLOR)));
 		FillProvider provider = fillMap.get((String) getSetting(GRAPHICAL_FOREGROUND_FILL));
 		Object evaluator = getSetting(GRAPHICAL_EVALUATOR);
 		if (evaluator == NO_EVALUATOR) {
@@ -257,12 +265,25 @@ public class GraphicalSettings {
 							Double maximum = Double.parseDouble((String) getSetting(GRAPHICAL_FOREGROUND_MAX));
 							b.setInterval(minimum, maximum);
 							brushes.add(new ConditionalBrush(b, (String) key));
+						} else if (value instanceof String && key instanceof String) {
+							try {
+								URI uri = URI.create((String) value);
+								Image img = ImageIO.read(uri.toURL());
+								Brush b = new ImageBrush(img);
+								brushes.add(new ConditionalBrush(b, (String) key));
+								hasGraphic = true;
+							} catch (Exception e) {
+								// No image means no brush to add
+							}
 						}
 					}
 				}
 			}
 		}
-		brushes.add(new Outline((Color) getSetting(GRAPHICAL_OUTLINE_COLOR)));
+		if (!hasGraphic) {
+			brushes.add(0, new Fill((Color) getSetting(GRAPHICAL_BACKGROUND_COLOR)));
+			brushes.add(new Outline((Color) getSetting(GRAPHICAL_OUTLINE_COLOR)));
+		}
 
 		return brushes;
 	}
@@ -390,8 +411,8 @@ public class GraphicalSettings {
 	 * @param str the string form of the map, as made by encodeMap
 	 * @return a Map object representing the string->color mappings
 	 */
-	private Map<String, Color> decodeMap (String str) {
-		Map<String, Color> map = new LinkedHashMap<String, Color>();
+	private Map<String, Object> decodeMap (String str) {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		
 		StringTokenizer mapTokens = new StringTokenizer(str, "\n");
 		while (mapTokens.hasMoreTokens()) {
@@ -400,8 +421,12 @@ public class GraphicalSettings {
 				StringTokenizer entryTokens = new StringTokenizer(pair, "\t");
 				if (entryTokens.countTokens() == 2) {
 					String key = entryTokens.nextToken();
-					Color  value = colorMap.get(entryTokens.nextToken());
-					map.put(key, value);
+					String value = entryTokens.nextToken();
+					if (colorMap.containsKey(entryTokens)) {
+						map.put(key, colorMap.get(entryTokens.nextToken()));
+					} else {
+						map.put(key, value); // Raw string - probably image uri
+					}
 				}
 			}
 		}
@@ -420,9 +445,11 @@ public class GraphicalSettings {
 		
 		Set keySet = map.keySet();
 		for (Object plainKey : keySet) {
-			if (plainKey instanceof String) {
-				String key   = (String) plainKey;
-				String value = reverseMap.get(map.get(key));
+			if (plainKey instanceof String && 
+				(map.get(plainKey) instanceof Color || map.get(plainKey) instanceof String)) {
+				String key   = (String) plainKey;				
+				String value = reverseMap.containsKey(map.get(key)) ? 
+						reverseMap.get(map.get(key)) : (String) map.get(plainKey);
 				if (value != null) {
 					s.append(key);
 					s.append("\t");

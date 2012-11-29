@@ -35,17 +35,22 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -53,6 +58,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * A control panel for editing properties of Dynamic Graphics. Works hand-in-hand 
@@ -74,12 +80,13 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 	private JTextField          maxField;
 	private JLabel              intervalLabel;
 	private Map<String, JPanel> mappingPanelNames = new LinkedHashMap<String, JPanel>();
-	private Map<String, Color>  mappingColors     = new LinkedHashMap<String, Color> ();
+	private Map<String, Object> mappingColors     = new LinkedHashMap<String, Object> ();
 	
 	private static final String    ADD_MAPPING_BUTTON = "AddMappingButton";
 	private static final String    REMOVE_BUTTON      = "RemoveMappingButton";
 	private static final String    NEXT_COLOR         = "NextColor";
 	private static final String    NEXT_EVALUATION    = "NextEvaluation";
+	private static final String    EDIT_MAPPING_PANEL = "EditMappingPanel";
 	
 	private static final Dimension BUTTON_DIMENSION = new Dimension (20, 20);
 	private static final Dimension COMBO_BOX_DIMENSION = new Dimension (70, 20);
@@ -235,8 +242,8 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 	 */
 	private void loadMappings(Map map) {
 		for (Object key : map.keySet()) {
-			if (key instanceof String && map.get(key) instanceof Color) {
-				addMapping ((String) key, (Color) map.get(key));
+			if (key instanceof String) {
+				addMapping ((String) key, map.get(key));
 			}
 		}
 	}
@@ -247,14 +254,26 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 	 * @param value the color to associate with the evaluation
 	 * @return the JPanel that shows this mapping
 	 */
-	private JPanel addMapping(String key, Color value) {		
+	private JPanel addMapping(String key, Object value) {		
 		String buttonName = REMOVE_BUTTON + key;
 		Color  background = mappingPanel.getBackground().darker(); 
 		
 		JLabel keyLabel   = new JLabel(key);	
 		
-		JPanel colorPanel = new JPanel();
-		colorPanel.setBackground(value);
+		final JPanel colorPanel = new JPanel();
+		if (value instanceof Color) {
+			colorPanel.setBackground((Color) value);
+		} else if (value instanceof String) {
+			colorPanel.add(new JLabel((String) value));
+			// TODO: Draw the image!
+		}
+		colorPanel.setName(EDIT_MAPPING_PANEL + key);
+		colorPanel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				new GraphicalFileChooserLauncher(colorPanel).launch();
+			}
+		});
 		JPanel pairPanel = makeEqualPair(keyLabel, colorPanel);
 		pairPanel.setBorder(BorderFactory.createLineBorder(background, 2));
 		pairPanel.setBackground(background);
@@ -400,6 +419,15 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 			value = mappingColors;                             // for settings update
 		}
 		
+		/* Added an image to the enumeration */
+		if (name.startsWith(EDIT_MAPPING_PANEL)) {
+			String key = name.replaceFirst(EDIT_MAPPING_PANEL, "");
+			String uri = event.getActionCommand();
+			mappingColors.put(key, uri);
+			name  = GraphicalSettings.GRAPHICAL_EVALUATOR_MAP; // Set name/value
+			value = mappingColors;
+		}
+		
 		/* Remove an existing Evaluation->Color mapping */
 		if (name.startsWith(REMOVE_BUTTON)) {
 			String key = name.replaceFirst(REMOVE_BUTTON, "");		
@@ -501,6 +529,41 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 			g.fillRect(0, 0, getWidth(), getHeight());
 		}
 
+		
+	}
+	
+	
+	private class GraphicalFileChooserLauncher extends FileFilter {
+		private JComponent source;
+		
+		public GraphicalFileChooserLauncher(JComponent source) {
+			this.source = source;
+		}
+		
+		@Override
+		public boolean accept(File f) {
+			if (f.isDirectory()) return true;
+			boolean valid = false;
+			for (String suffix : ImageIO.getReaderFileSuffixes()) {
+				valid |= f.getName().toLowerCase().endsWith("." + suffix.toLowerCase());
+			}
+			valid |= f.getName().toLowerCase().endsWith(".svg"); // We also support SVG
+			return valid;
+		}
+	
+		@Override
+		public String getDescription() {
+			return bundle.getString("Wizard_Filter_Description");			
+		}
+		
+		public void launch() {
+			JFileChooser chooser = new JFileChooser();
+			chooser.addChoosableFileFilter(this);
+			
+			if (chooser.showOpenDialog(source) == JFileChooser.APPROVE_OPTION) {
+				actionPerformed(new ActionEvent(source, 0, chooser.getSelectedFile().toURI().toString()));
+			}
+		}
 		
 	}
 }
