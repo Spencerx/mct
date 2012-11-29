@@ -80,7 +80,7 @@ public class GraphicalManifestation extends FeedView implements RenderingCallbac
 		
 		setBackground(UIManager.getColor("background"));
 		
-		this.setOpaque(true);	
+		this.setOpaque(false);	
 		
 		feedProviderList = Collections.singletonList(getFeedProvider(getManifestedComponent()));
 		

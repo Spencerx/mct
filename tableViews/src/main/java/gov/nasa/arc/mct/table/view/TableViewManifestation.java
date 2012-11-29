@@ -300,6 +300,10 @@ public class TableViewManifestation extends FeedView
 			}
 
 		});
+		
+		table.getTable().setOpaque(false);
+		table.setOpaque(false);
+		setOpaque(false);
 	}
 
 	private Color getColor(String name) {

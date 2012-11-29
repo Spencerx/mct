@@ -92,6 +92,7 @@ public final class TableViewCellRenderer extends LightweightLabel implements Tab
 		super();
 		setBorder(getNoFocusBorder());
 		setForeground(Color.BLACK);    //Default color - usually gets replaced
+		setOpaque(false);
 		setName("Table.cellRenderer");
 		formatter.setBorderColor(getColor("userGrid"));
 	}

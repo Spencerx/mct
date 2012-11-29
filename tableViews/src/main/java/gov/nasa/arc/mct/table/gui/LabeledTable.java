@@ -231,6 +231,7 @@ public class LabeledTable extends JPanel {
 		table.getTableHeader().setDefaultRenderer(headerRenderer);
 		
 		rowHeaders = new JList(model.getRowLabelModel());
+		rowHeaders.setOpaque(false);
 		rowHeaders.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		
 		rowHeaders.setCellRenderer(new ListCellRenderer() {
@@ -286,12 +287,15 @@ public class LabeledTable extends JPanel {
 					Border inside = BorderFactory.createEmptyBorder(hasNorth ? 0 : w, hasWest ? 0 : w, hasSouth ? 0 : w, hasEast ? 0 : w);
 					label.setBorder(BorderFactory.createCompoundBorder(outside,inside));
 				}
+
+				label.setOpaque(false);
 				return label;
 			}
 			
 		});
 		
 		titleLabelList = new JList(new String[]{" "});
+		titleLabelList.setOpaque(false);
 		titleLabelList.setEnabled(false);
 		
 		setTableFont(titleLabelList);
@@ -312,7 +316,6 @@ public class LabeledTable extends JPanel {
 //				d.setSize(d.getWidth() + 2*ROW_HEADER_MARGIN, d.getHeight());
 //				comp.setPreferredSize(d);
 				comp.setBackground(Color.black);
-				
 				return comp;
 			}
 			

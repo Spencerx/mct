@@ -136,6 +136,10 @@ public class Panel extends JPanel implements SelectionProvider, NamingContext {
         addStatusWidgetsIfApplicable();
         
         this.wrappedManifestation.getSelectionProvider().addSelectionChangeListener(selectionListener);
+        
+        setOpaque(wrappedManifestation.isOpaque());
+        scrollPane.setOpaque(wrappedManifestation.isOpaque());
+        scrollPane.getViewport().setOpaque(wrappedManifestation.isOpaque());
     }
     
     public void setScrollColor(Color scrollColor, Color bgColor) {
