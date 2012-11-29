@@ -28,18 +28,9 @@ import gov.nasa.arc.mct.gui.View;
 import gov.nasa.arc.mct.services.component.ViewInfo;
 
 import java.awt.BorderLayout;
-import java.awt.Graphics;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ResourceBundle;
 
-import javax.imageio.ImageIO;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -48,8 +39,6 @@ public class StaticGraphicalView extends View {
     private static ResourceBundle bundle = ResourceBundle.getBundle("GraphicsResourceBundle");
     
 	private static final long serialVersionUID = -6823838565608622054L;
-	private SVGRasterizer rasterizer = null;
-	private ImagePanel    imagePanel = new ImagePanel();
 	
 	public static final String VIEW_ROLE_NAME = bundle.getString("View_Name");
 	
@@ -58,83 +47,15 @@ public class StaticGraphicalView extends View {
 
 		setBackground(UIManager.getColor("background"));
 		setForeground(UIManager.getColor("foreground"));
-
-		imagePanel.setBackground(getBackground());
-		add(imagePanel);
 		
 		if (component instanceof GraphicalComponent) { 
 			GraphicalModel model =  ((GraphicalComponent)component).getModelRole();
-			prepareGraphicalView(model.getGraphicURI());
+			add(new ResizableImagePanel(model.getGraphicURI()));
 		} else {
 			prepareFailureLabel(bundle.getString("Component_Error"));
 		}
 		
 	}	
-	
-	private void prepareGraphicalView(final String graphicURI) {
-
-		if (graphicURI.endsWith(".svg")) {
-			rasterizer = new SVGRasterizer(graphicURI);
-			rasterizer.setCallback(new Runnable() {
-				public void run() {						
-					if (rasterizer.hasFailed()) {
-						prepareRasterImage(graphicURI); // Maybe the extension is wrong
-					} else {							
-						imagePanel.setImage(rasterizer.getLatestImage());
-					}
-					repaint();					
-				}
-			});
-			
-			addComponentListener( new ComponentListener() {
-				@Override
-				public void componentHidden(ComponentEvent arg0) {
-					/* Get a smaller image - less memory use */
-					rasterizer.requestRender(50, 50);					
-				}
-
-				@Override
-				public void componentMoved(ComponentEvent arg0) {
-				}
-
-				@Override
-				public void componentResized(ComponentEvent arg0) {
-					rasterizer.requestRender(getWidth(), getHeight());
-				}
-
-				@Override
-				public void componentShown(ComponentEvent arg0) {
-					rasterizer.requestRender(getWidth(), getHeight());					
-				}
-				
-			});
-			
-		} else {		
-			prepareRasterImage(graphicURI);
-		}
-					
-	}
-	
-	private void prepareRasterImage(String graphicURI) {
-		try {
-			BufferedImage img = ImageIO.read(new URL(graphicURI));
-			if (img != null) {
-				imagePanel.setImage(img);
-			} else {
-				prepareFailureLabel("Type_Error", graphicURI);
-			}
-		} catch (IOException ioe) {
-			prepareFailureLabel(
-					(ioe.getCause() instanceof FileNotFoundException) ? 
-							"FileNotFound_Error" : "Location_Error", 
-					graphicURI);
-		}
-	}
-		
-	private void prepareFailureLabel(String bundleKey, String graphicURI) {
-		String failureString = bundle.getString(bundleKey);
-		prepareFailureLabel( String.format(failureString, graphicURI) );
-	}
 	
 	private void prepareFailureLabel(final String failureText) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -148,26 +69,6 @@ public class StaticGraphicalView extends View {
 				repaint();
 			}
 		});
-	}
-		
-	
-	private class ImagePanel extends JPanel {
-		private static final long serialVersionUID = -2223786881389122841L;
-		
-		private BufferedImage image = null;
-		
-		public void setImage(BufferedImage image) {
-			this.image = image;
-		}
-
-		public void paint(Graphics g) {
-			super.paint(g);
-			if (image != null) {			
-				g.drawImage(image, 0, 0, getWidth(), getHeight(), 
-						0, 0, image.getWidth(), image.getHeight(), this);
-			} 			
-		}
-		
 	}
 }
 
