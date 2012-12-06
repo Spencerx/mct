@@ -25,6 +25,7 @@ import gov.nasa.arc.mct.graphics.component.GraphicalComponent;
 import gov.nasa.arc.mct.graphics.component.GraphicalComponentWizardUI;
 import gov.nasa.arc.mct.graphics.view.GraphicalManifestation;
 import gov.nasa.arc.mct.graphics.view.StaticGraphicalView;
+import gov.nasa.arc.mct.graphics.view.drawing.DrawingView;
 import gov.nasa.arc.mct.policy.PolicyInfo;
 import gov.nasa.arc.mct.services.component.AbstractComponentProvider;
 import gov.nasa.arc.mct.services.component.ComponentTypeInfo;
@@ -53,7 +54,8 @@ public class GraphicalComponentProvider extends AbstractComponentProvider {
 					new ImageIcon(GraphicalManifestation.class.getResource("/icons/graphicsViewButton-OFF.png")),
 					new ImageIcon(GraphicalManifestation.class.getResource("/icons/graphicsViewButton-ON.png"))),
     		new ViewInfo(StaticGraphicalView.class, GraphicalManifestation.VIEW_ROLE_NAME, ViewType.OBJECT),
-    		new ViewInfo(StaticGraphicalView.class, GraphicalManifestation.VIEW_ROLE_NAME, ViewType.EMBEDDED)
+    		new ViewInfo(StaticGraphicalView.class, GraphicalManifestation.VIEW_ROLE_NAME, ViewType.EMBEDDED),
+    		new ViewInfo(DrawingView.class, DrawingView.VIEW_ROLE_NAME, ViewType.EMBEDDED)
     		);     
     
     public GraphicalComponentProvider(){

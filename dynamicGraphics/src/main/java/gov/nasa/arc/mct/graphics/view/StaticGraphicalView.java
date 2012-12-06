@@ -55,6 +55,7 @@ public class StaticGraphicalView extends View {
 			prepareFailureLabel(bundle.getString("Component_Error"));
 		}
 		
+		setOpaque(false);
 	}	
 	
 	private void prepareFailureLabel(final String failureText) {
