@@ -54,8 +54,7 @@ public class GraphicalComponentProvider extends AbstractComponentProvider {
 					new ImageIcon(GraphicalManifestation.class.getResource("/icons/graphicsViewButton-OFF.png")),
 					new ImageIcon(GraphicalManifestation.class.getResource("/icons/graphicsViewButton-ON.png"))),
     		new ViewInfo(StaticGraphicalView.class, GraphicalManifestation.VIEW_ROLE_NAME, ViewType.OBJECT),
-    		new ViewInfo(StaticGraphicalView.class, GraphicalManifestation.VIEW_ROLE_NAME, ViewType.EMBEDDED),
-    		new ViewInfo(DrawingView.class, DrawingView.VIEW_ROLE_NAME, ViewType.EMBEDDED)
+    		new ViewInfo(StaticGraphicalView.class, GraphicalManifestation.VIEW_ROLE_NAME, ViewType.EMBEDDED)
     		);     
     
     public GraphicalComponentProvider(){

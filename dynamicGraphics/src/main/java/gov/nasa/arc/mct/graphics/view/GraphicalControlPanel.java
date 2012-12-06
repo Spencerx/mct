@@ -260,12 +260,9 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 		
 		JLabel keyLabel   = new JLabel(key);	
 		
-		final JPanel colorPanel = new JPanel();
+		final JPanel colorPanel = (value instanceof String) ? new ResizableImagePanel((String) value) : new JPanel();
 		if (value instanceof Color) {
 			colorPanel.setBackground((Color) value);
-		} else if (value instanceof String) {
-			colorPanel.add(new JLabel((String) value));
-			// TODO: Draw the image!
 		}
 		colorPanel.setName(EDIT_MAPPING_PANEL + key);
 		colorPanel.addMouseListener(new MouseAdapter() {
@@ -424,6 +421,10 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 			String key = name.replaceFirst(EDIT_MAPPING_PANEL, "");
 			String uri = event.getActionCommand();
 			mappingColors.put(key, uri);
+			comp.removeAll();
+			comp.add(new ResizableImagePanel(uri));
+			revalidate();
+			repaint();
 			name  = GraphicalSettings.GRAPHICAL_EVALUATOR_MAP; // Set name/value
 			value = mappingColors;
 		}
@@ -547,7 +548,7 @@ public class GraphicalControlPanel extends JPanel implements ActionListener {
 			for (String suffix : ImageIO.getReaderFileSuffixes()) {
 				valid |= f.getName().toLowerCase().endsWith("." + suffix.toLowerCase());
 			}
-			valid |= f.getName().toLowerCase().endsWith(".svg"); // We also support SVG
+			//valid |= f.getName().toLowerCase().endsWith(".svg"); // We also support SVG
 			return valid;
 		}
 	

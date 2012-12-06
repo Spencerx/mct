@@ -33,6 +33,7 @@ import gov.nasa.arc.mct.gui.NamingContext;
 import gov.nasa.arc.mct.gui.Request;
 import gov.nasa.arc.mct.roles.events.PropertyChangeEvent;
 import gov.nasa.arc.mct.services.component.ViewInfo;
+import gov.nasa.arc.mct.services.component.ViewType;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -80,7 +81,7 @@ public class GraphicalManifestation extends FeedView implements RenderingCallbac
 		
 		setBackground(UIManager.getColor("background"));
 		
-		this.setOpaque(false);	
+		this.setOpaque(!(vi.getViewType() == ViewType.EMBEDDED));	
 		
 		feedProviderList = Collections.singletonList(getFeedProvider(getManifestedComponent()));
 		

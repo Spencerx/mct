@@ -14,9 +14,10 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class ResizableImagePanel extends JComponent {
+public class ResizableImagePanel extends JPanel {
     private static ResourceBundle bundle = ResourceBundle.getBundle("GraphicsResourceBundle");
     
 	private static final long serialVersionUID = -6823838565608622054L;
@@ -123,9 +124,17 @@ public class ResizableImagePanel extends JComponent {
 
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			if (image != null) {			
-				g.drawImage(image, 0, 0, getWidth(), getHeight(), 
+			if (image != null) {
+				int x,y,w,h;
+				boolean pillarbox = getWidth() * image.getHeight() > getHeight() * image.getWidth();
+			    boolean letterbox = getWidth() * image.getHeight() < getHeight() * image.getWidth();
+				w = !pillarbox ? getWidth()  : (getHeight() * image.getWidth() / image.getHeight());
+				h = !letterbox ? getHeight() : (getWidth()  * image.getHeight() / image.getWidth());
+				x = (getWidth()  - w) / 2;
+				y = (getHeight() - h) / 2;
+				g.drawImage(image, x, y, x+w, y+h, 
 						0, 0, image.getWidth(), image.getHeight(), this);
+
 			} 			
 		}
 		

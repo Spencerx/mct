@@ -301,9 +301,9 @@ public class TableViewManifestation extends FeedView
 
 		});
 		
-		table.getTable().setOpaque(false);
-		table.setOpaque(false);
-		setOpaque(false);
+		table.getTable().setOpaque(!(vi.getViewType() == ViewType.EMBEDDED));
+		table.setOpaque(!(vi.getViewType() == ViewType.EMBEDDED));
+		setOpaque(!(vi.getViewType() == ViewType.EMBEDDED));
 	}
 
 	private Color getColor(String name) {
