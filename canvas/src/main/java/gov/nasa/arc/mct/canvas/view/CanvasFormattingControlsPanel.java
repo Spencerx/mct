@@ -21,14 +21,16 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.canvas.view;
 
+import static gov.nasa.arc.mct.gui.util.ConstraintBuilder.hbox;
 import gov.nasa.arc.mct.canvas.formatting.ControlAreaFormattingConstants;
 import gov.nasa.arc.mct.canvas.formatting.ControlAreaFormattingConstants.BorderStyle;
 import gov.nasa.arc.mct.canvas.formatting.ControlAreaFormattingConstants.JVMFontFamily;
 import gov.nasa.arc.mct.canvas.panel.Panel;
 import gov.nasa.arc.mct.canvas.panel.PanelBorder;
 import gov.nasa.arc.mct.canvas.view.CanvasIcons.Icons;
+import gov.nasa.arc.mct.canvas.view.overlay.OverlayChooser;
 import gov.nasa.arc.mct.gui.util.ConstraintBuilder;
-import static gov.nasa.arc.mct.gui.util.ConstraintBuilder.hbox;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -1054,8 +1056,12 @@ public class CanvasFormattingControlsPanel extends JPanel {
         JPanel miscellaneousInnerPanel = new JPanel();
         miscellaneousInnerPanel.setLayout(new GridBagLayout());
 
+        // Overlay chooser
+        JPanel overlayPanel = new JPanel();
+        overlayPanel.add(new JLabel("Active editing layer: "));
+        overlayPanel.add(new OverlayChooser(managedCanvas.augmentation));
+        
         // Arrange inner panel
-
         GridBagConstraints findConstraints = new GridBagConstraints();
         findConstraints.anchor = GridBagConstraints.NORTHWEST;
         findConstraints.fill = GridBagConstraints.NONE;
@@ -1073,11 +1079,19 @@ public class CanvasFormattingControlsPanel extends JPanel {
         findConstraints.gridx = 0;
         findConstraints.gridy = 0;
         miscellaneousInnerPanel.add(miscellaneousPanelTitleLabel, findConstraints);
-        
 
+        findConstraints = new GridBagConstraints();
+        findConstraints.anchor = GridBagConstraints.NORTHWEST;
+        findConstraints.fill = GridBagConstraints.NONE;
+        findConstraints.weighty = MISC_PANEL_WEIGHT_Y;
+        findConstraints.weightx = 1;
+        findConstraints.gridx = 0;
+        findConstraints.gridy = 2;
+        miscellaneousInnerPanel.add(overlayPanel, findConstraints);
+        
         // attach inner panel
         miscellaneousPanel.add(miscellaneousInnerPanel, BorderLayout.CENTER);
-
+        
         // return completed misc. panel.
         return miscellaneousPanel;
     }

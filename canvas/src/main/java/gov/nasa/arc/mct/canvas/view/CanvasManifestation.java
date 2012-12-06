@@ -76,6 +76,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -183,6 +184,7 @@ public class CanvasManifestation extends View implements PanelFocusSelectionProv
                 setLayout(overlayLayout);
                 add(augmentation);
                 add(canvasPanel);
+                
                 setRepaintComponentPair(canvasPanel, augmentation);
                 computePreferredSize();
             } finally {                
