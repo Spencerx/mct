@@ -1,13 +1,50 @@
+/*******************************************************************************
+ * Mission Control Technologies, Copyright (c) 2009-2012, United States Government
+ * as represented by the Administrator of the National Aeronautics and Space 
+ * Administration. All rights reserved.
+ *
+ * The MCT platform is licensed under the Apache License, Version 2.0 (the 
+ * "License"); you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ *
+ * MCT includes source code licensed under additional open source licenses. See 
+ * the MCT Open Source Licenses file included with this distribution or the About 
+ * MCT Licenses dialog available at runtime from the MCT Help menu for additional 
+ * information. 
+ *******************************************************************************/
 package gov.nasa.arc.mct.canvas.view.overlay;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.Rectangle;
 
-public class Line implements DrawingElement {
-	private Color color = Color.RED;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Line extends DrawingElement {
+	
+    @XmlTransient
+    private Color color = Color.RED;
+
+    @XmlJavaTypeAdapter(PointAdapter.class)
 	private Point start, end;
+	
+	public Line() {
+	    this(0,0,0,0);
+	}
 	
 	public Line(int x1, int y1, int x2, int y2) {
 		start = new Point();
@@ -101,21 +138,36 @@ public class Line implements DrawingElement {
 			end.y   = e.y + (y - this.y);
 		}		
 	}
-
 	
-	//TODO: This would be better handled by JAXB or similar?
-    @Override
-    public String stringify() {        
-        return "" + start.x + "," + start.y + "," + end.x + "," + end.y;
-    }
-
-    @Override
-    public void destringify(String str) {
-        String[] parts = str.split(",");
-        start.x = Integer.parseInt(parts[0]);
-        start.y = Integer.parseInt(parts[1]);
-        end  .x = Integer.parseInt(parts[2]);
-        end  .y = Integer.parseInt(parts[3]);
-    }
+//    @Override
+//    public String toPersistableObject() {        
+//        return "" + start.x + "," + start.y + "," + end.x + "," + end.y;
+//    }
+//
+//    @Override
+//    public void fromPersistableObject(String str) {
+//        String[] parts = str.split(",");
+//        start.x = Integer.parseInt(parts[0]);
+//        start.y = Integer.parseInt(parts[1]);
+//        end  .x = Integer.parseInt(parts[2]);
+//        end  .y = Integer.parseInt(parts[3]);
+//    }
+//
 	
+	/**
+	 * Assists in serializing java.awt.Point; JAXB will hit an infinite loop 
+	 * interpreting getLocation if used on Point directly.
+	 */
+	public static class PointAdapter extends XmlAdapter<String, Point> {
+	    @Override
+	    public String marshal(Point arg0) throws Exception {
+	        return arg0.x + "," + arg0.y;
+	    }
+
+	    @Override
+	    public Point unmarshal(String arg0) throws Exception {
+	        String[] s = arg0.split(",");
+	        return new Point(Integer.parseInt(s[0]), Integer.parseInt(s[1]));
+	    }
+	}
 }

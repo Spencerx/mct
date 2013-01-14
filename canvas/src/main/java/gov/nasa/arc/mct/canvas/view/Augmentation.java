@@ -102,7 +102,7 @@ public class Augmentation extends JComponent {
         String overlayInitial = canvasManifestation.getViewProperties().getProperty("CANVAS_OVERLAY_DEMO", String.class);
         DrawingOverlay o = new DrawingOverlay();
         if (overlayInitial != null) {
-            o.destringify(overlayInitial);
+            o.getStatePersistence().setModelState(overlayInitial);
         }
         overlays.add(o);
         for (CanvasOverlay overlay : overlays) {
@@ -142,8 +142,8 @@ public class Augmentation extends JComponent {
      */
     public void setActiveLayer(CanvasOverlay o) {
         for (CanvasOverlay overlay : overlays) {
-            removeMouseListener(overlay);
-            removeMouseMotionListener(overlay);
+            removeMouseListener(overlay.getControlAdapter());
+            removeMouseMotionListener(overlay.getControlAdapter());
         }
         if (o == null) {
             addMouseListener(mouseAdapter);
@@ -156,8 +156,8 @@ public class Augmentation extends JComponent {
             removeMouseListener(marqueSelectionListener);
             removeMouseMotionListener(marqueSelectionListener); 
             
-            addMouseListener(o);
-            addMouseMotionListener(o);
+            addMouseListener(o.getControlAdapter());
+            addMouseMotionListener(o.getControlAdapter());
         }
     }
     
@@ -892,7 +892,7 @@ public class Augmentation extends JComponent {
         public void overlayUpdated() {
             String overlayValues = "";
             for (CanvasOverlay o : overlays) { 
-                overlayValues += o.stringify();
+                overlayValues += o.getStatePersistence().getModelState();
             }
             if (!overlayValues.isEmpty()) {
                 ExtendedProperties properties = canvasManifestation.getViewProperties();
