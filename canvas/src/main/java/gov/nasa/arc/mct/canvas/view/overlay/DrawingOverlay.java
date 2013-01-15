@@ -21,6 +21,7 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.canvas.view.overlay;
 
+import gov.nasa.arc.mct.canvas.view.overlay.DrawingElement.ElementHandle;
 import gov.nasa.arc.mct.components.JAXBModelStatePersistence;
 import gov.nasa.arc.mct.components.ModelStatePersistence;
 
@@ -138,7 +139,7 @@ public class DrawingOverlay extends AbstractCanvasOverlay {
 
     @Override
     public void draw(Graphics g) {
-        for (Drawable element : elements) {
+        for (DrawingElement element : elements) {
             element.draw(g);
         }
     }

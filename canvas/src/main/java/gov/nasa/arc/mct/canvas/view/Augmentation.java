@@ -25,7 +25,7 @@ import gov.nasa.arc.mct.canvas.MenuManagerAccess;
 import gov.nasa.arc.mct.canvas.panel.Panel;
 import gov.nasa.arc.mct.canvas.view.overlay.CanvasOverlay;
 import gov.nasa.arc.mct.canvas.view.overlay.DrawingOverlay;
-import gov.nasa.arc.mct.canvas.view.overlay.OverlayListener;
+import gov.nasa.arc.mct.canvas.view.overlay.CanvasOverlay.OverlayListener;
 import gov.nasa.arc.mct.components.ExtendedProperties;
 import gov.nasa.arc.mct.gui.View;
 import gov.nasa.arc.mct.services.component.MenuManager;

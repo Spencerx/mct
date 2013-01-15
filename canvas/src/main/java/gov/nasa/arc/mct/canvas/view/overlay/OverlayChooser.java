@@ -26,6 +26,7 @@ import gov.nasa.arc.mct.canvas.view.Augmentation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.JComboBox;
 
@@ -33,7 +34,7 @@ public class OverlayChooser extends JComboBox {
     private static final long serialVersionUID = 4749301723217975689L;
     
     public OverlayChooser(final Augmentation augmentation) {
-        this(augmentation, augmentation.getOverlays());
+        this(augmentation, augmentation != null ? augmentation.getOverlays() : Collections.<CanvasOverlay>emptyList() );
     }
     
     public OverlayChooser(final Augmentation augmentation, Collection<CanvasOverlay> overlays) {

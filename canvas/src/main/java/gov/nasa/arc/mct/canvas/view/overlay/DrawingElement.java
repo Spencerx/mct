@@ -21,9 +21,16 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.canvas.view.overlay;
 
+import java.awt.Graphics;
+
 import javax.xml.bind.annotation.XmlTransient;
 
 @XmlTransient
-public abstract class DrawingElement implements Drawable {
+public abstract class DrawingElement {
 	public abstract ElementHandle getHandle(int x, int y);
+	public abstract void draw(Graphics g);
+	
+	public static interface ElementHandle {
+	    public void moveTo(int x, int y);
+	}
 }

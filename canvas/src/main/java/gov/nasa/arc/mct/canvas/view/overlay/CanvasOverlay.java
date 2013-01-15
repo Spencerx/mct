@@ -23,14 +23,22 @@ package gov.nasa.arc.mct.canvas.view.overlay;
 
 import gov.nasa.arc.mct.components.ModelStatePersistence;
 
+import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 
-public interface CanvasOverlay extends Drawable {
+public interface CanvasOverlay {
     public void   addOverlayListener(OverlayListener listener);
 
     public MouseAdapter getControlAdapter();
     
     public String getName();
     
-    public ModelStatePersistence getStatePersistence(); 
+    public void draw(Graphics g);
+    
+    public ModelStatePersistence getStatePersistence();
+    
+    public static interface OverlayListener {
+        public void overlayUpdating();
+        public void overlayUpdated();
+    }
 }
