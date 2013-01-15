@@ -25,12 +25,46 @@ import java.awt.Graphics;
 
 import javax.xml.bind.annotation.XmlTransient;
 
+/**
+ * A drawing element is a visible object in a DrawingOverlay (for instance, a Line).
+ * This serves as a general-purpose superclass to allow multiple different elements of a
+ * drawing package to be treated uniformly.
+ * @author vwoeltje
+ */
 @XmlTransient
 public abstract class DrawingElement {
+    /**
+     * Request a handle for interacting with this element, at a specific location.
+     * The return value will be null if there is no appropriate handle available at this 
+     * location.
+     * 
+     * Typically, this method will be called when the user clicks at a specific point on 
+     * the screen to initiate interaction; this interaction will then be mediated by the 
+     * returned handle.
+     *  
+     * @param x the x coordinate of the desired handle, in pixels
+     * @param y the y coordinate of the desired handle, in pixels
+     * @return a handle for interacting with this element (or null, if none at this location)
+     */
 	public abstract ElementHandle getHandle(int x, int y);
+	
+    /**
+     * Draw this element.
+     * @param g the graphics context in which to draw
+     */
 	public abstract void draw(Graphics g);
 	
+	/**
+	 * An ElementHandle mediates user interactions with a drawing element; it is responsible 
+	 * for updating the elements state as necessary (during mouse drags, for instance)
+	 * @author vwoeltje
+	 */
 	public static interface ElementHandle {
+	    /**
+	     * Move this handle to a specific location.
+	     * @param x the x coordinate, in pixels
+	     * @param y the y coordinate, in pixels
+	     */
 	    public void moveTo(int x, int y);
 	}
 }

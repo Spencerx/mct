@@ -30,14 +30,24 @@ import java.util.Collections;
 
 import javax.swing.JComboBox;
 
+/**
+ * A combo box containing a set of all available overlays for a given augmentation, which includes 
+ * some default behavior for updating its active layer based on user selection. 
+ * 
+ * @author vwoeltje
+ */
 public class OverlayChooser extends JComboBox {
     private static final long serialVersionUID = 4749301723217975689L;
     
+    /**
+     * Create a new chooser to select overlays, based on those made available via the augmentation.
+     * @param augmentation the augmentation which manages these overlays.
+     */
     public OverlayChooser(final Augmentation augmentation) {
         this(augmentation, augmentation != null ? augmentation.getOverlays() : Collections.<CanvasOverlay>emptyList() );
     }
-    
-    public OverlayChooser(final Augmentation augmentation, Collection<CanvasOverlay> overlays) {
+
+    private OverlayChooser(final Augmentation augmentation, Collection<CanvasOverlay> overlays) {
         super();
         addItem(new Item(null));
         for (CanvasOverlay overlay : overlays) {
@@ -52,6 +62,11 @@ public class OverlayChooser extends JComboBox {
         });
     }
     
+    /**
+     * Used as a wrapper for overlays to connect toString to overlay.getName, 
+     * so that these are the names displayed by the combo box.
+     * @author vwoeltje
+     */
     private static class Item {
         private CanvasOverlay o;
         private Item (CanvasOverlay o) {

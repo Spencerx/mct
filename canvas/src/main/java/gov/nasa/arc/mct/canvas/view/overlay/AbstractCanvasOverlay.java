@@ -24,6 +24,11 @@ package gov.nasa.arc.mct.canvas.view.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract class to serve as a base implementation for CanvasOverlays.
+ * 
+ * @author vwoeltje
+ */
 public abstract class AbstractCanvasOverlay implements CanvasOverlay {
     private List<OverlayListener> listeners = new ArrayList<OverlayListener>();
     
@@ -35,14 +40,21 @@ public abstract class AbstractCanvasOverlay implements CanvasOverlay {
         listeners.add(listener);
     }
     
+    /**
+     * Fire an overlayUpdating event; this will notify listeners that the overlay is in the process 
+     * of being updated (for instance, to trigger repainting)
+     * @see gov.nasa.arc.mct.canvas.view.overlay.CanvasOverlay.OverlayListener#overlayUpdating()
+     */
     public void fireOverlayUpdating() {
         for (OverlayListener listener : listeners) listener.overlayUpdating();
     }
 
+    /**
+     * For an overlayUpdated event; this will notify listeners that the overlay is finished 
+     * being updated (for instance, to trigger changes to view properties)
+     * @see gov.nasa.arc.mct.canvas.view.overlay.CanvasOverlay.OverlayListener#overlayUpdated()
+     */
     public void fireOverlayUpdated() {
         for (OverlayListener listener : listeners) listener.overlayUpdated();
     }
-    
-    
-    
 }

@@ -96,9 +96,16 @@ public class Augmentation extends JComponent {
 
     private MarqueSelectionListener marqueSelectionListener;
     
+    /**
+     * All overlays (for drawing, etc) available along with this Augmentation
+     */
     private List<CanvasOverlay> overlays = new ArrayList<CanvasOverlay>();
     
     public Augmentation(JPanel augmentedPanel, CanvasManifestation canvasManifestation) {
+        /*
+         * First, load overlays. These can function as an additional drawing & interaction layer (for instance, to 
+         * add drawing package functionality). The current DrawingOverlay offered by default is a minimal example of this. 
+         */
         String overlayInitial = canvasManifestation.getViewProperties().getProperty("CANVAS_OVERLAY_DEMO", String.class);
         DrawingOverlay o = new DrawingOverlay();
         if (overlayInitial != null) {
@@ -108,6 +115,7 @@ public class Augmentation extends JComponent {
         for (CanvasOverlay overlay : overlays) {
             overlay.addOverlayListener(overlayListener);
         }
+        
         this.augmentedPanel = augmentedPanel;
         this.canvasManifestation = canvasManifestation;
         this.marqueSelectionListener =  new MarqueSelectionListener(
@@ -161,6 +169,10 @@ public class Augmentation extends JComponent {
         }
     }
     
+    /**
+     * Retrieve all available overlays (drawing layers, etc) available as part of this augmentation.
+     * @return a collection of all available overlays
+     */
     public Collection<CanvasOverlay> getOverlays() {
         return overlays;
     }
@@ -414,9 +426,11 @@ public class Augmentation extends JComponent {
             return;
         }
         
+        // Draw all highlights (for panel selection, etc)
         for (Panel panel : highlightedPanels)
             highlight(panel, (Graphics2D) g);
         
+        // Draw any additional overlays
         for (CanvasOverlay overlay : overlays) {
             overlay.draw(g);
         }
@@ -508,6 +522,11 @@ public class Augmentation extends JComponent {
         augmentation.setCursor(cursor);
     }
 
+    /**
+     * Handles mouse events for augmentation in its default mode (that is, supporting panel interactions)
+     * This may be swapped out with other controls from an available overlay if the user selects a different
+     * layer.    
+     */
     private final MouseAdapter mouseAdapter = new MouseAdapter() {
         @Override
         public void mouseEntered(MouseEvent e) {
