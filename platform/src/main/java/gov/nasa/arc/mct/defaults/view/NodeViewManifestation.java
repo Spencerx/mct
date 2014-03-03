@@ -55,6 +55,7 @@ import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.slf4j.Logger;
@@ -316,6 +317,22 @@ public class NodeViewManifestation extends View {
         }
     }
     
+    
+    
+    @Override
+    public AbstractComponent getParentManifestation() {
+        if (node != null && !node.isProxy()) {
+            TreeNode parentNode = node.getParent();
+            if (parentNode instanceof MCTMutableTreeNode) {
+                return ((View) ((MCTMutableTreeNode) parentNode).getUserObject()).getManifestedComponent();
+            }
+        }
+        // If the parent can't be found, return default (null)
+        return super.getParentManifestation();
+    }
+
+
+
     protected class NodeViewManifestationListener extends AbstractViewListener {
         
         @Override
