@@ -29,6 +29,7 @@
 package gov.nasa.arc.mct.gui.housing;
 
 import gov.nasa.arc.mct.components.AbstractComponent;
+import gov.nasa.arc.mct.gui.ContextAwareAction;
 import gov.nasa.arc.mct.gui.MCTMutableTreeNode;
 import gov.nasa.arc.mct.gui.OptionBox;
 import gov.nasa.arc.mct.gui.SelectionProvider;
@@ -36,10 +37,13 @@ import gov.nasa.arc.mct.gui.Twistie;
 import gov.nasa.arc.mct.gui.View;
 import gov.nasa.arc.mct.gui.ViewProvider;
 import gov.nasa.arc.mct.gui.ViewRoleSelection;
+import gov.nasa.arc.mct.gui.actions.DuplicateAction;
+import gov.nasa.arc.mct.gui.actions.LinkAction;
 import gov.nasa.arc.mct.gui.actions.MoveAction;
 import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
 import gov.nasa.arc.mct.gui.menu.MenuFactory;
 import gov.nasa.arc.mct.gui.util.GUIUtil;
+import gov.nasa.arc.mct.platform.spi.PlatformAccess;
 import gov.nasa.arc.mct.policy.ExecutionResult;
 import gov.nasa.arc.mct.policy.PolicyContext;
 import gov.nasa.arc.mct.policy.PolicyInfo;
@@ -516,7 +520,7 @@ public class MCTDirectoryArea extends View implements ViewProvider, SelectionPro
         private void actionPerformed(Collection<View> sourceViews, View targetViewManifestation, final MCTDirectoryArea directoryArea, TreePath path, int childIndex) {
             AbstractComponent targetComponent = targetViewManifestation.getManifestedComponent();
             
-            MoveAction moveAction = new MoveAction(targetComponent);
+            List<ContextAwareAction> actions = new ArrayList<ContextAwareAction>();
 
             ActionContextImpl actionContext = new ActionContextImpl();
             actionContext.setTargetComponent(targetComponent);
@@ -525,8 +529,21 @@ public class MCTDirectoryArea extends View implements ViewProvider, SelectionPro
                 actionContext.addTargetViewComponent(view);
             }
             
-            if (moveAction.canHandle(actionContext) && moveAction.isEnabled()) {
-                moveAction.actionPerformed(null);
+            for (ContextAwareAction a : new ContextAwareAction[] {
+                    new MoveAction(targetComponent),
+                    new LinkAction(targetComponent),
+                    new DuplicateAction(targetComponent)
+            }) {
+                if (a.canHandle(actionContext) && a.isEnabled()) {
+                    actions.add(a);
+                }
+            }
+            
+            ContextAwareAction[] options = actions.toArray(new ContextAwareAction[actions.size()]);
+            ContextAwareAction action = PlatformAccess.getPlatform().getWindowManager().showInputDialog("Select action", "", options, options[0], null);//new LinkAction(targetComponent);
+            
+            if (action != null) {
+                action.actionPerformed(null);
 
                 Collection<AbstractComponent> sourceComponents = new ArrayList<AbstractComponent>();
                 for (View view : sourceViews) {
