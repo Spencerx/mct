@@ -61,9 +61,15 @@ public class DuplicateAction extends ContextAwareAction {
     private TreePath[] selectedTreePaths;
     private MCTDirectoryArea directoryArea;
     private ActionContextImpl actionContext;
+    private AbstractComponent destinationComponent = null;
     
     public DuplicateAction() {
         super(TEXT);
+    }
+    
+    public DuplicateAction(AbstractComponent destination) {
+        super(TEXT);
+        destinationComponent = destination;
     }
     
     @AfterMethod
@@ -77,9 +83,8 @@ public class DuplicateAction extends ContextAwareAction {
         for (TreePath path : selectedTreePaths) {
             
             MCTMutableTreeNode selectedNode = (MCTMutableTreeNode) path.getLastPathComponent();
-            MCTMutableTreeNode parentNode = (MCTMutableTreeNode) selectedNode.getParent();
         
-            AbstractComponent parentComponent = ((View) parentNode.getUserObject()).getManifestedComponent();
+            AbstractComponent parentComponent = destinationComponent;
             AbstractComponent selectedComponent = ((View) selectedNode.getUserObject()).getManifestedComponent();
         
             if (selectedComponent == null) {
@@ -146,15 +151,17 @@ public class DuplicateAction extends ContextAwareAction {
         
         MCTMutableTreeNode selectedNode = (MCTMutableTreeNode) selectedTreePaths[0].getLastPathComponent();
         MCTMutableTreeNode parentNode = (MCTMutableTreeNode) selectedNode.getParent();
-        AbstractComponent parentComponent = ((View) parentNode.getUserObject()).getManifestedComponent();
+        if (destinationComponent == null) {
+            destinationComponent = ((View) parentNode.getUserObject()).getManifestedComponent();
+        }
 
-        return isParentComponentModifiable(parentComponent);
+        return isParentComponentModifiable();
     }
 
-    private boolean isParentComponentModifiable(AbstractComponent parentComponent) {
+    private boolean isParentComponentModifiable() {
         // Check if parent component can be modified.
         PolicyContext policyContext = new PolicyContext();
-        policyContext.setProperty(PolicyContext.PropertyName.TARGET_COMPONENT.getName(), parentComponent);
+        policyContext.setProperty(PolicyContext.PropertyName.TARGET_COMPONENT.getName(), destinationComponent);
         policyContext.setProperty(PolicyContext.PropertyName.ACTION.getName(), 'w');
         String compositionKey = PolicyInfo.CategoryType.COMPOSITION_POLICY_CATEGORY.getKey();
         return PolicyManagerImpl.getInstance().execute(compositionKey, policyContext).getStatus();

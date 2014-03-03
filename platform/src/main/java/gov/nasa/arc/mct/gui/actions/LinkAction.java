@@ -41,7 +41,7 @@ public class LinkAction extends ContextAwareAction {
     private Collection<AbstractComponent> sourceComponents = new ArrayList<AbstractComponent>();
     
     public LinkAction(AbstractComponent destination) {
-        super("Move");
+        super("Link");
         this.targetComponent = destination;
     }
 
