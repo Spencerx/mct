@@ -24,7 +24,6 @@ package gov.nasa.arc.mct.gui.actions;
 import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
-import gov.nasa.arc.mct.gui.MCTMutableTreeNode;
 import gov.nasa.arc.mct.gui.OptionBox;
 import gov.nasa.arc.mct.gui.View;
 import gov.nasa.arc.mct.gui.housing.MCTDirectoryArea;
@@ -58,9 +57,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTree;
 import javax.swing.SwingConstants;
-import javax.swing.tree.TreePath;
 
 /**
  * This action removes a manifestation in the directory area. Note that 
@@ -74,7 +71,7 @@ public class RemoveManifestationAction extends ContextAwareAction {
     private static final ResourceBundle bundle = ResourceBundle.getBundle("gov/nasa/arc/mct/gui/actions/Bundle"); 
     private static String TEXT = "Remove Manifestation";
     private static String WARNING = bundle.getString("RemoveLastManifestationWarningTitle");
-    private TreePath[] selectedTreePaths;
+    private Collection<View> selectedViews = new ArrayList<View>();
     private ActionContextImpl actionContext;
     
     public RemoveManifestationAction() {
@@ -91,8 +88,9 @@ public class RemoveManifestationAction extends ContextAwareAction {
         Collection<View> selection = 
             activeHousing.getSelectionProvider().getSelectedManifestations();
         
-        if (selection.isEmpty())
+        if (selection == null || (selection.isEmpty())) {
             return false;
+        }
         
         ViewInfo vi = selection.iterator().next().getInfo();
         
@@ -104,21 +102,15 @@ public class RemoveManifestationAction extends ContextAwareAction {
             return false;
         }
             
-        MCTDirectoryArea directory = MCTDirectoryArea.class.cast(activeHousing.getDirectoryArea());
-        MCTMutableTreeNode firstSelectedNode = directory.getSelectedDirectoryNode();
-        if (firstSelectedNode == null)
-            return false;
-        
-        JTree tree = firstSelectedNode.getParentTree();
-        selectedTreePaths = tree.getSelectionPaths();
-        return selectedTreePaths != null && selectedTreePaths.length >  0;
+        selectedViews.addAll(selection);
+        return true;
     }
     
     @Override
     public boolean isEnabled() {
     
-        for (TreePath path : selectedTreePaths) {
-            if (!isRemovable(path))
+        for (View view : selectedViews) {
+            if (!isRemovable(view))
                 return false;
         }
         return true;
@@ -128,16 +120,16 @@ public class RemoveManifestationAction extends ContextAwareAction {
     public void actionPerformed(ActionEvent e) {
         Map<String,Integer> numberOfParents = new HashMap<String,Integer>();
         Set<String> lastManifestationComponents = new HashSet<String>();
-        List<Map<MCTMutableTreeNode, MCTMutableTreeNode>> okToRemoveManifestations = new ArrayList<Map<MCTMutableTreeNode, MCTMutableTreeNode>>();
+        List<Map<AbstractComponent, AbstractComponent>> okToRemoveManifestations = 
+                new ArrayList<Map<AbstractComponent, AbstractComponent>>();
         
-        for (TreePath path : selectedTreePaths) {
-            MCTMutableTreeNode selectedNode = (MCTMutableTreeNode) path.getLastPathComponent();            
-            MCTMutableTreeNode parentNode = (MCTMutableTreeNode) selectedNode.getParent();
-            
-            AbstractComponent selectedComponent = ((View) selectedNode.getUserObject()).getManifestedComponent();
+        for (View view : selectedViews) {
+            AbstractComponent parentComponent = view.getParentManifestation();
+            AbstractComponent selectedComponent = view.getManifestedComponent();
 
             if (!numberOfParents.containsKey(selectedComponent.getComponentId()))  {
-                numberOfParents.put(selectedComponent.getComponentId(), Integer.valueOf(selectedComponent.getReferencingComponents().size()));
+                numberOfParents.put(selectedComponent.getComponentId(), 
+                        Integer.valueOf(selectedComponent.getReferencingComponents().size()));
             } 
             // If component is the last manifestation, 
             if (numberOfParents.get(selectedComponent.getComponentId()) == 1) {
@@ -161,11 +153,11 @@ public class RemoveManifestationAction extends ContextAwareAction {
                 if (selectedComponent.getComponents().size() == 0) {
                     lastManifestationComponents.add(selectedComponent.getComponentId());
                     //Remove it from ok-to-remove Manifestations
-                    Iterator<Map<MCTMutableTreeNode, MCTMutableTreeNode>> iterator = okToRemoveManifestations.iterator();
+                    Iterator<Map<AbstractComponent, AbstractComponent>> iterator = okToRemoveManifestations.iterator();
                     while (iterator.hasNext()) {
-                        Map<MCTMutableTreeNode, MCTMutableTreeNode> map = iterator.next();
-                        for (MCTMutableTreeNode mapNode : map.values()) {
-                            if (((View) mapNode.getUserObject()).getManifestedComponent().getComponentId().equals(selectedComponent.getComponentId())) {
+                        Map<AbstractComponent, AbstractComponent> map = iterator.next();
+                        for (AbstractComponent mapComponent : map.values()) {
+                            if (mapComponent.getComponentId().equals(selectedComponent.getComponentId())) {
                                 iterator.remove();
                             }
                         }
@@ -178,8 +170,8 @@ public class RemoveManifestationAction extends ContextAwareAction {
                 }
             } else {
                 // Has more than 1 parent
-                Map<MCTMutableTreeNode, MCTMutableTreeNode> okManifestationMap = new HashMap<MCTMutableTreeNode, MCTMutableTreeNode>();
-                okManifestationMap.put(parentNode, selectedNode);
+                Map<AbstractComponent, AbstractComponent> okManifestationMap = new HashMap<AbstractComponent, AbstractComponent>();
+                okManifestationMap.put(parentComponent, selectedComponent);
                 okToRemoveManifestations.add(okManifestationMap);
                 numberOfParents.put(selectedComponent.getComponentId(), numberOfParents.get(selectedComponent.getComponentId())-1);
             }
@@ -189,7 +181,7 @@ public class RemoveManifestationAction extends ContextAwareAction {
         }
     }
     
-    private void handleWarnings(boolean canRemove, List<Map<MCTMutableTreeNode, MCTMutableTreeNode>> okToRemoveManifestations, 
+    private void handleWarnings(boolean canRemove, List<Map<AbstractComponent, AbstractComponent>> okToRemoveManifestations, 
             Set<String> lastManifestationComponents) {
         
         if (!canRemove) {
@@ -215,9 +207,9 @@ public class RemoveManifestationAction extends ContextAwareAction {
             }
         }
         // Remove and/or Delete Objects
-        for (Map<MCTMutableTreeNode, MCTMutableTreeNode> okMap : okToRemoveManifestations) {
-            AbstractComponent parentComponent = ((View) okMap.entrySet().iterator().next().getKey().getUserObject()).getManifestedComponent();
-            AbstractComponent selectedComponent = ((View) okMap.entrySet().iterator().next().getValue().getUserObject()).getManifestedComponent();
+        for (Map<AbstractComponent, AbstractComponent> okMap : okToRemoveManifestations) {
+            AbstractComponent parentComponent = okMap.entrySet().iterator().next().getKey();
+            AbstractComponent selectedComponent = okMap.entrySet().iterator().next().getValue();
             parentComponent.removeDelegateComponent(selectedComponent);
             parentComponent.save();
         }
@@ -229,12 +221,12 @@ public class RemoveManifestationAction extends ContextAwareAction {
         
     }
     
-    private JPanel buildWarningPanel(List<Map<MCTMutableTreeNode, MCTMutableTreeNode>> okToRemoveManifestations, 
+    private JPanel buildWarningPanel(List<Map<AbstractComponent, AbstractComponent>> okToRemoveManifestations, 
             Set<String> lastManifestationComponents) {
         Set<String> okComps = new HashSet<String>(okToRemoveManifestations.size());
         List<String> lastComps = new ArrayList<String>(lastManifestationComponents.size());
-        for (Map<MCTMutableTreeNode, MCTMutableTreeNode> okMap : okToRemoveManifestations) {
-            AbstractComponent selectedComponent = ((View) okMap.entrySet().iterator().next().getValue().getUserObject()).getManifestedComponent();
+        for (Map<AbstractComponent, AbstractComponent> okMap : okToRemoveManifestations) {
+            AbstractComponent selectedComponent = okMap.entrySet().iterator().next().getValue();
             okComps.add(selectedComponent.getDisplayName());
         }
         for (String comp : lastManifestationComponents) {
@@ -278,20 +270,18 @@ public class RemoveManifestationAction extends ContextAwareAction {
         return warning;
     }
     
-    private boolean isRemovable(TreePath path) {
-        MCTMutableTreeNode lastPathComponent = (MCTMutableTreeNode) path.getLastPathComponent();
-        MCTMutableTreeNode parentNode = (MCTMutableTreeNode) lastPathComponent.getParent();
-        if (parentNode == null)
-            return false;
+    private boolean isRemovable(View view) {
+        AbstractComponent parentComponent = view.getParentManifestation();
+        AbstractComponent selectedComponent = view.getManifestedComponent();
         
-        AbstractComponent parentComponent = ((View) parentNode.getUserObject()).getManifestedComponent();
-        AbstractComponent selectedComponent = View.class.cast(lastPathComponent.getUserObject()).getManifestedComponent();
+        if (parentComponent == null) {
+            return false; // Nowhere to remove this from
+        }
 
         PolicyContext context = new PolicyContext();
         context.setProperty(PolicyContext.PropertyName.TARGET_COMPONENT.getName(), parentComponent);
         context.setProperty(PolicyContext.PropertyName.ACTION.getName(), 'w');
         context.setProperty(PolicyContext.PropertyName.SOURCE_COMPONENTS.getName(), Collections.singleton(selectedComponent));
-        context.setProperty(PolicyContext.PropertyName.VIEW_MANIFESTATION_PROVIDER.getName(), parentNode.getUserObject());
         
         String canRemoveManifestationKey = PolicyInfo.CategoryType.CAN_REMOVE_MANIFESTATION_CATEGORY.getKey();
         boolean canRemoveManifestation = PolicyManagerImpl.getInstance().execute(canRemoveManifestationKey, context).getStatus();
