@@ -96,8 +96,7 @@ public class RemoveManifestationAction extends ContextAwareAction {
         
         ViewInfo vi = selection.iterator().next().getInfo();
         
-        if (selection.isEmpty() || 
-                !(vi != null && vi.getViewType() == ViewType.NODE)){
+        if (!(vi != null && vi.getViewType() == ViewType.NODE)){
             return false;
         }
 
