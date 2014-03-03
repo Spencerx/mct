@@ -41,6 +41,7 @@ import gov.nasa.arc.mct.gui.actions.DuplicateAction;
 import gov.nasa.arc.mct.gui.actions.LinkAction;
 import gov.nasa.arc.mct.gui.actions.MoveAction;
 import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
+import gov.nasa.arc.mct.gui.impl.WindowManagerImpl;
 import gov.nasa.arc.mct.gui.menu.MenuFactory;
 import gov.nasa.arc.mct.gui.util.GUIUtil;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
@@ -77,12 +78,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.TooManyListenersException;
 import java.util.WeakHashMap;
 
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
@@ -520,7 +523,8 @@ public class MCTDirectoryArea extends View implements ViewProvider, SelectionPro
         private void actionPerformed(Collection<View> sourceViews, View targetViewManifestation, final MCTDirectoryArea directoryArea, TreePath path, int childIndex) {
             AbstractComponent targetComponent = targetViewManifestation.getManifestedComponent();
             
-            List<ContextAwareAction> actions = new ArrayList<ContextAwareAction>();
+            Map<String, ContextAwareAction> actions = new HashMap<String, ContextAwareAction>();
+            List<String> actionNames = new ArrayList<String>();
 
             ActionContextImpl actionContext = new ActionContextImpl();
             actionContext.setTargetComponent(targetComponent);
@@ -535,15 +539,20 @@ public class MCTDirectoryArea extends View implements ViewProvider, SelectionPro
                     new DuplicateAction(targetComponent)
             }) {
                 if (a.canHandle(actionContext) && a.isEnabled()) {
-                    actions.add(a);
+                    String name = a.getValue(Action.NAME).toString();
+                    actions.put(name, a);
+                    actionNames.add(name);
                 }
             }
             
-            ContextAwareAction[] options = actions.toArray(new ContextAwareAction[actions.size()]);
-            ContextAwareAction action = PlatformAccess.getPlatform().getWindowManager().showInputDialog("Select action", "", options, options[0], null);//new LinkAction(targetComponent);
+            String[] options = actionNames.toArray(new String[actionNames.size()]);
+            Map<String, Object> hints = new HashMap<String, Object>();
+            hints.put(WindowManagerImpl.OPTION_TYPE, OptionBox.DEFAULT_OPTION);
             
-            if (action != null) {
-                action.actionPerformed(null);
+            String actionName = PlatformAccess.getPlatform().getWindowManager().showInputDialog("Select action", "", options, options[0], hints);
+            
+            if (actionName != null) {
+                actions.get(actionName).actionPerformed(null);
 
                 Collection<AbstractComponent> sourceComponents = new ArrayList<AbstractComponent>();
                 for (View view : sourceViews) {

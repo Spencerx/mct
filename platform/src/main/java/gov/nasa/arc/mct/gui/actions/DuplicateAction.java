@@ -68,7 +68,7 @@ public class DuplicateAction extends ContextAwareAction {
     }
     
     public DuplicateAction(AbstractComponent destination) {
-        super(TEXT);
+        super("Duplicate");
         destinationComponent = destination;
     }
     
