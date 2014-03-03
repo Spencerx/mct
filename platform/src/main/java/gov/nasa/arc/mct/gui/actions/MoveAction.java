@@ -21,33 +21,64 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.gui.actions;
 
+import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
+import gov.nasa.arc.mct.gui.View;
+import gov.nasa.arc.mct.platform.spi.PlatformAccess;
+import gov.nasa.arc.mct.policy.ExecutionResult;
+import gov.nasa.arc.mct.policy.PolicyContext;
+import gov.nasa.arc.mct.policy.PolicyInfo;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class MoveAction extends RemoveManifestationAction {
     private static final long serialVersionUID = -3683849461079613041L;
 
-    public MoveAction() {
+    private AbstractComponent targetComponent = null;
+    private Collection<AbstractComponent> sourceComponents = new ArrayList<AbstractComponent>();
+    
+    public MoveAction(AbstractComponent destination) {
         super("Move");
+        this.targetComponent = destination;
     }
 
     @Override
-    public boolean canHandle(ActionContext context) {
-        // TODO Auto-generated method stub
-        return super.canHandle(context);
+    public boolean canHandle(ActionContext context) {        
+        sourceComponents.clear();
+        for (View view : context.getSelectedManifestations()) {
+            sourceComponents.add(view.getManifestedComponent());
+        }
+        return super.canHandle(context) && compositionIsAllowed(); 
     }
 
     @Override
     public boolean isEnabled() {
-        // TODO Auto-generated method stub
         return super.isEnabled();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // TODO Auto-generated method stub
+        targetComponent.addDelegateComponents(sourceComponents);
+        targetComponent.save();
         super.actionPerformed(e);
+    }
+    
+    private boolean compositionIsAllowed() {
+        // Establish policy context.
+        PolicyContext context = new PolicyContext();
+        context.setProperty(PolicyContext.PropertyName.TARGET_COMPONENT.getName(), targetComponent);
+        context.setProperty(PolicyContext.PropertyName.SOURCE_COMPONENTS.getName(), sourceComponents);
+        context.setProperty(PolicyContext.PropertyName.ACTION.getName(), Character.valueOf('w'));
+        String compositionKey = PolicyInfo.CategoryType.COMPOSITION_POLICY_CATEGORY.getKey();
+        String acceptDelegateKey = PolicyInfo.CategoryType.ACCEPT_DELEGATE_MODEL_CATEGORY.getKey();
+        // Execute policy
+        ExecutionResult result = PlatformAccess.getPlatform().getPolicyManager().execute(compositionKey, context);
+        if (result.getStatus()) {
+            result = PlatformAccess.getPlatform().getPolicyManager().execute(acceptDelegateKey, context);
+        }
+        return result.getStatus();
     }
     
 }
