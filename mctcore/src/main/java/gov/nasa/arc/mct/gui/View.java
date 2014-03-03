@@ -475,6 +475,21 @@ public abstract class View extends JPanel implements ViewProvider, LockObserver 
     public ViewInfo getInfo() {
         return info;
     }
+    
+    /**
+     * Get the object which is the container for the manifested component.
+     * This is to support context-sensitive actions such as Remove Manifestation,
+     * which needs to know which referencing component should lose its 
+     * reference (a component may be contained in multiple places.)
+     * 
+     * Will return null if there is no such context for a given view. (e.g. if a 
+     * view is of the thing itself.)
+     * 
+     * @return the component which contains this manifestation
+     */
+    public AbstractComponent getParentManifestation() {
+        return null;
+    }
 
     /**
      * Sets the info used to create this view.
