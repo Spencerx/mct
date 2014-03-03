@@ -60,9 +60,20 @@ public class MoveAction extends RemoveManifestationAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        targetComponent.addDelegateComponents(sourceComponents);
-        targetComponent.save();
-        super.actionPerformed(e);
+        PlatformAccess.getPlatform().getPersistenceProvider().startRelatedOperations();
+        try {
+            targetComponent.addDelegateComponents(sourceComponents);
+            targetComponent.save();
+        } finally {
+            PlatformAccess.getPlatform().getPersistenceProvider().completeRelatedOperations(true);
+        }
+        
+        PlatformAccess.getPlatform().getPersistenceProvider().startRelatedOperations();
+        try {
+            super.actionPerformed(e);
+        } finally {
+            PlatformAccess.getPlatform().getPersistenceProvider().completeRelatedOperations(true);
+        }
     }
     
     private boolean compositionIsAllowed() {
