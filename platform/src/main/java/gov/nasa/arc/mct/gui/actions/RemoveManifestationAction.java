@@ -78,6 +78,11 @@ public class RemoveManifestationAction extends ContextAwareAction {
         super(TEXT);
     }
     
+    // For Move Action
+    protected RemoveManifestationAction(String text) {
+        super(text);
+    }
+    
     @Override
     public boolean canHandle(ActionContext context) {
         actionContext = (ActionContextImpl) context;
