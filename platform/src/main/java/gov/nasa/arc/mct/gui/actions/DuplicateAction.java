@@ -57,6 +57,7 @@ import org.testng.annotations.AfterMethod;
 public class DuplicateAction extends ContextAwareAction {
 
     private static String TEXT = "Duplicate Object...";
+    private static String SHORT_TEXT = "Copy";
         
     private TreePath[] selectedTreePaths;
     private MCTDirectoryArea directoryArea;
@@ -68,7 +69,7 @@ public class DuplicateAction extends ContextAwareAction {
     }
     
     public DuplicateAction(AbstractComponent destination) {
-        super("Duplicate");
+        super(SHORT_TEXT);
         destinationComponent = destination;
     }
     
