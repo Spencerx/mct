@@ -25,13 +25,11 @@ import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.context.GlobalContext;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
-import gov.nasa.arc.mct.gui.MCTMutableTreeNode;
 import gov.nasa.arc.mct.gui.OptionBox;
 import gov.nasa.arc.mct.gui.View;
 import gov.nasa.arc.mct.gui.dialogs.DuplicateObjectDialog;
-import gov.nasa.arc.mct.gui.housing.MCTDirectoryArea;
-import gov.nasa.arc.mct.gui.housing.MCTHousing;
 import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
+import gov.nasa.arc.mct.platform.spi.PlatformAccess;
 import gov.nasa.arc.mct.policy.PolicyContext;
 import gov.nasa.arc.mct.policy.PolicyInfo;
 import gov.nasa.arc.mct.policymgr.PolicyManagerImpl;
@@ -41,11 +39,7 @@ import gov.nasa.arc.mct.services.internal.component.ComponentInitializer;
 import gov.nasa.arc.mct.util.StringUtil;
 
 import java.awt.event.ActionEvent;
-import java.util.Collection;
 import java.util.Collections;
-
-import javax.swing.JTree;
-import javax.swing.tree.TreePath;
 
 import org.testng.annotations.AfterMethod;
 
@@ -59,8 +53,6 @@ public class DuplicateAction extends ContextAwareAction {
     private static String TEXT = "Duplicate Object...";
     private static String SHORT_TEXT = "Copy";
         
-    private TreePath[] selectedTreePaths;
-    private MCTDirectoryArea directoryArea;
     private ActionContextImpl actionContext;
     private AbstractComponent destinationComponent = null;
     
@@ -79,35 +71,42 @@ public class DuplicateAction extends ContextAwareAction {
     }
     
     @Override
-    public void actionPerformed(ActionEvent e) {        
- 
-        for (TreePath path : selectedTreePaths) {
-            
-            MCTMutableTreeNode selectedNode = (MCTMutableTreeNode) path.getLastPathComponent();
+    public void actionPerformed(ActionEvent e) {
+        // Only use startRelatedOperations if this is invoked from move/copy dialog
+        boolean groupOperations = e == null;
         
-            AbstractComponent parentComponent = destinationComponent;
-            AbstractComponent selectedComponent = ((View) selectedNode.getUserObject()).getManifestedComponent();
-        
-            if (selectedComponent == null) {
-                OptionBox.showMessageDialog(null, "Unable to create duplicate of this object!", "Error creating duplicate.", OptionBox.ERROR_MESSAGE);
-                return;
-            }
+        if (groupOperations) {
+            PlatformAccess.getPlatform().getPersistenceProvider().startRelatedOperations();
+        }
+        try {
+            for (View view : actionContext.getSelectedManifestations()) {                    
+                AbstractComponent parentComponent = destinationComponent;
+                AbstractComponent selectedComponent = view.getManifestedComponent();
             
-            DuplicateObjectDialog dialog = new DuplicateObjectDialog(actionContext.getTargetHousing().getHostedFrame(),
-                                                            selectedComponent.getDisplayName());
-            String name = dialog.getConfirmedTelemetryGroupName();
-
-            if (!StringUtil.isEmpty(name)) {
-                AbstractComponent duplicate = selectedComponent.clone();
-                ComponentInitializer ci = duplicate.getCapability(ComponentInitializer.class);
-                ci.setCreator(GlobalContext.getGlobalContext().getUser().getUserId());
-                ci.setOwner(GlobalContext.getGlobalContext().getUser().getUserId());
-                duplicate.setDisplayName(name);
-                duplicate.save();
-                parentComponent.addDelegateComponent(duplicate);
-                parentComponent.save();
+                if (selectedComponent == null) {
+                    OptionBox.showMessageDialog(null, "Unable to create duplicate of this object!", "Error creating duplicate.", OptionBox.ERROR_MESSAGE);
+                    return;
+                }
+                
+                DuplicateObjectDialog dialog = new DuplicateObjectDialog(actionContext.getTargetHousing().getHostedFrame(),
+                                                                selectedComponent.getDisplayName());
+                String name = dialog.getConfirmedTelemetryGroupName();
+    
+                if (!StringUtil.isEmpty(name)) {
+                    AbstractComponent duplicate = selectedComponent.clone();
+                    ComponentInitializer ci = duplicate.getCapability(ComponentInitializer.class);
+                    ci.setCreator(GlobalContext.getGlobalContext().getUser().getUserId());
+                    ci.setOwner(GlobalContext.getGlobalContext().getUser().getUserId());
+                    duplicate.setDisplayName(name);
+                    duplicate.save();
+                    parentComponent.addDelegateComponent(duplicate);
+                    parentComponent.save();
+                }
             }
-
+        } finally {
+            if (groupOperations) {
+                PlatformAccess.getPlatform().getPersistenceProvider().completeRelatedOperations(true);
+            }
         }
 
     }
@@ -120,43 +119,35 @@ public class DuplicateAction extends ContextAwareAction {
     @Override
     public boolean canHandle(ActionContext context) {
         actionContext = (ActionContextImpl) context;
-        MCTHousing activeHousing = actionContext.getTargetHousing();
-        if (activeHousing == null)
-            return false;
-        
-        if (!(activeHousing.getDirectoryArea() instanceof MCTDirectoryArea)) {
-            return false;
-        }
-        
-        directoryArea = MCTDirectoryArea.class.cast(activeHousing.getDirectoryArea());
-        Collection<View> selectedManifestationsInDirectory = directoryArea.getSelectedManifestations();
         
         // This action works only for selected items in the directory area.
-        if (selectedManifestationsInDirectory == null || selectedManifestationsInDirectory.isEmpty())
-            return false;
-        
-        MCTMutableTreeNode firstSelectedNode = directoryArea.getSelectedDirectoryNode();
-        if (firstSelectedNode == null)
-            return false;
-        
-        if (!isComponentCreatable(actionContext.getTargetComponent())) {
+        if (actionContext.getSelectedManifestations() == null || 
+                actionContext.getSelectedManifestations().isEmpty()) {
             return false;
         }
         
-        JTree tree = firstSelectedNode.getParentTree();
-        selectedTreePaths = tree.getSelectionPaths();
+        for (View view : actionContext.getSelectedManifestations()) {
+            if (!isComponentCreatable(view.getManifestedComponent())) {
+                return false;
+            }
+        }
         
-        if (selectedTreePaths.length > 1)
-            return false;
-        
-        
-        MCTMutableTreeNode selectedNode = (MCTMutableTreeNode) selectedTreePaths[0].getLastPathComponent();
-        MCTMutableTreeNode parentNode = (MCTMutableTreeNode) selectedNode.getParent();
         if (destinationComponent == null) {
-            destinationComponent = ((View) parentNode.getUserObject()).getManifestedComponent();
+            String destinationId = null;
+            for (View view : actionContext.getSelectedManifestations()) {
+                AbstractComponent dest = view.getParentManifestation();
+                if (dest != null) {
+                    String id = dest.getComponentId();
+                    if (destinationId != null && destinationId.equals(id)) {
+                        return false; // Ambiguous destination                       
+                    }
+                    destinationComponent = dest;
+                    destinationId = id;
+                }
+            }
         }
 
-        return isParentComponentModifiable();
+        return destinationComponent != null && isParentComponentModifiable();
     }
 
     private boolean isParentComponentModifiable() {
@@ -170,10 +161,12 @@ public class DuplicateAction extends ContextAwareAction {
     
     @Override
     public boolean isEnabled() {
-        AbstractComponent component = actionContext.getTargetComponent();
-        if (component == null || component.getExternalKey() != null)
-            return false;
-        
+        for (View v : actionContext.getSelectedManifestations()) {
+            AbstractComponent c = v.getManifestedComponent();
+            if (c == null || c.getExternalKey() != null) {
+                return false;
+            }
+        }        
         return true;
     }
     
