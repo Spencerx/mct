@@ -24,9 +24,13 @@ package gov.nasa.arc.mct.gui.actions;
 import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
+import gov.nasa.arc.mct.gui.View;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import javax.swing.Action;
 
@@ -44,7 +48,9 @@ public class MoveAction extends ContextAwareAction {
     }
 
     @Override
-    public boolean canHandle(ActionContext context) {        
+    public boolean canHandle(ActionContext context) {
+        // Filter out non-moves
+        context = new FilteredActionContext(context);
         boolean canHandle = true;
         for (ContextAwareAction action : actions) {
             canHandle &= action.canHandle(context);
@@ -81,5 +87,41 @@ public class MoveAction extends ContextAwareAction {
             }
         }
         
+    }
+    
+    private static class FilteredActionContext implements ActionContext {
+        private ActionContext context;
+        private List<View> selectedManifestations = new ArrayList<View>();
+
+        public FilteredActionContext(ActionContext context) {
+            this.context = context;
+            AbstractComponent target = context.getTargetComponent();
+            // Filter out any "moves" which will not result in any change
+            if (context.getSelectedManifestations() != null) {
+                for (View view : context.getSelectedManifestations()) {
+                    AbstractComponent parent = view.getParentManifestation();
+                    // Don't include selections that are to->from same containing object
+                    if (target == null || parent == null || !target.getComponentId().equals(parent.getComponentId())) {
+                        selectedManifestations.add(view);
+                    }
+                }
+            }
+        }
+
+        public Collection<View> getSelectedManifestations() {
+            return selectedManifestations;
+        }
+
+        public View getWindowManifestation() {
+            return context.getWindowManifestation();
+        }
+
+        public Collection<View> getRootManifestations() {
+            return context.getRootManifestations();
+        }
+
+        public AbstractComponent getTargetComponent() {
+            return context.getTargetComponent();
+        }
     }
 }

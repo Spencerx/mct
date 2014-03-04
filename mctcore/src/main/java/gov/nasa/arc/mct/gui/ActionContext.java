@@ -21,6 +21,8 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.gui;
 
+import gov.nasa.arc.mct.components.AbstractComponent;
+
 import java.util.Collection;
 
 /**
@@ -46,4 +48,10 @@ public interface ActionContext {
      * @return a collection of {@link View}
      */
     public Collection<View> getRootManifestations();
+    
+    /**
+     * 
+     * @return
+     */
+    public AbstractComponent getTargetComponent();
 }

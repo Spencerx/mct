@@ -26,9 +26,6 @@ import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
 import gov.nasa.arc.mct.gui.OptionBox;
 import gov.nasa.arc.mct.gui.View;
-import gov.nasa.arc.mct.gui.housing.MCTDirectoryArea;
-import gov.nasa.arc.mct.gui.housing.MCTHousing;
-import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
 import gov.nasa.arc.mct.policy.PolicyContext;
 import gov.nasa.arc.mct.policy.PolicyInfo;
@@ -72,7 +69,7 @@ public class RemoveManifestationAction extends ContextAwareAction {
     private static String TEXT = "Remove Manifestation";
     private static String WARNING = bundle.getString("RemoveLastManifestationWarningTitle");
     private Collection<View> selectedViews = new ArrayList<View>();
-    private ActionContextImpl actionContext;
+    private ActionContext actionContext;
     
     public RemoveManifestationAction() {
         super(TEXT);
@@ -85,13 +82,10 @@ public class RemoveManifestationAction extends ContextAwareAction {
     
     @Override
     public boolean canHandle(ActionContext context) {
-        actionContext = (ActionContextImpl) context;
-        MCTHousing activeHousing = actionContext.getTargetHousing();
-        if (activeHousing == null)
-            return false;
+        actionContext = context;
 
         Collection<View> selection = 
-            activeHousing.getSelectionProvider().getSelectedManifestations();
+            context.getSelectedManifestations();
         
         if (selection == null || (selection.isEmpty())) {
             return false;
@@ -100,10 +94,6 @@ public class RemoveManifestationAction extends ContextAwareAction {
         ViewInfo vi = selection.iterator().next().getInfo();
         
         if (!(vi != null && vi.getViewType() == ViewType.NODE)){
-            return false;
-        }
-
-        if (!(activeHousing.getDirectoryArea() instanceof MCTDirectoryArea)) {
             return false;
         }
             
