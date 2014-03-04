@@ -78,9 +78,12 @@ public final class DuplicateActionTest {
         ActionContextImpl actionContext = new ActionContextImpl();
         f.set(action, actionContext);
         
-        actionContext.setTargetComponent(componentWithoutExternalKey);
+        View view = Mockito.mock(View.class);
+        actionContext.addTargetViewComponent(view);
+        
+        Mockito.when(view.getManifestedComponent()).thenReturn(componentWithoutExternalKey);
         Assert.assertTrue(action.isEnabled());
-        actionContext.setTargetComponent(componentWithExternalKey);
+        Mockito.when(view.getManifestedComponent()).thenReturn(componentWithExternalKey);
         Assert.assertFalse(action.isEnabled());
     }
     
