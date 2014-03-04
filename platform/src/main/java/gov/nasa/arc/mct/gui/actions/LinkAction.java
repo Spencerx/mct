@@ -33,6 +33,7 @@ import gov.nasa.arc.mct.policy.PolicyInfo;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Represents the Add Manifestation action; adds references to 
@@ -56,7 +57,9 @@ public class LinkAction extends ContextAwareAction {
             sourceComponents.add(view.getManifestedComponent());
         }
         targetComponent = context.getTargetComponent();
-        return compositionIsAllowed(); 
+        return !sourceComponents.isEmpty() && 
+                targetComponent != null && 
+                compositionIsAllowed(); 
     }
 
     @Override
@@ -66,13 +69,9 @@ public class LinkAction extends ContextAwareAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        PlatformAccess.getPlatform().getPersistenceProvider().startRelatedOperations();
-        try {
-            targetComponent.addDelegateComponents(sourceComponents);
-            targetComponent.save();
-        } finally {
-            PlatformAccess.getPlatform().getPersistenceProvider().completeRelatedOperations(true);
-        }
+        targetComponent.addDelegateComponents(sourceComponents);
+        targetComponent.save();
+        PlatformAccess.getPlatform().getPersistenceProvider().persist(Collections.singleton(targetComponent));
     }
     
     private boolean compositionIsAllowed() {
