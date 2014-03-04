@@ -56,7 +56,7 @@ public class TestMenuExtensionManager {
         Mockito.when(manifestation.getParent()).thenReturn(housing);
 
         ActionContextImpl context = new ActionContextImpl();
-        context.setTargetComponent(component);
+        context.setProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, component);
         context.setTargetHousing(housing);
         
         // Check menu and action registration

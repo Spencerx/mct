@@ -25,6 +25,7 @@ import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
 import gov.nasa.arc.mct.gui.View;
+import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
 import gov.nasa.arc.mct.policy.ExecutionResult;
 import gov.nasa.arc.mct.policy.PolicyContext;
@@ -56,7 +57,7 @@ public class LinkAction extends ContextAwareAction {
         for (View view : context.getSelectedManifestations()) {
             sourceComponents.add(view.getManifestedComponent());
         }
-        targetComponent = context.getTargetComponent();
+        targetComponent = context.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class);
         return !sourceComponents.isEmpty() && 
                 targetComponent != null && 
                 compositionIsAllowed(); 

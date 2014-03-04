@@ -53,7 +53,7 @@ public class DoTheseAction extends GroupAction {
 	@Override
 	public boolean canHandle(ActionContext context) {
 	    ActionContextImpl actionContext = (ActionContextImpl) context;
-        AbstractComponent component = actionContext.getTargetComponent();
+        AbstractComponent component =  actionContext.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class);
         
         if (component == null)
         	return false;

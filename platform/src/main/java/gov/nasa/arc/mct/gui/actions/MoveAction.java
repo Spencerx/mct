@@ -25,6 +25,7 @@ import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
 import gov.nasa.arc.mct.gui.View;
+import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
 
 import java.awt.event.ActionEvent;
@@ -107,7 +108,7 @@ public class MoveAction extends ContextAwareAction {
 
         public FilteredActionContext(ActionContext context) {
             this.context = context;
-            AbstractComponent target = context.getTargetComponent();
+            AbstractComponent target = context.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class);
             // Filter out any "moves" which will not result in any change
             if (context.getSelectedManifestations() != null) {
                 for (View view : context.getSelectedManifestations()) {
@@ -132,8 +133,10 @@ public class MoveAction extends ContextAwareAction {
             return context.getRootManifestations();
         }
 
-        public AbstractComponent getTargetComponent() {
-            return context.getTargetComponent();
+        @Override
+        public <T> T getProperty(String key, Class<T> propertyClass) {
+            return context.getProperty(key, propertyClass);
         }
+
     }
 }

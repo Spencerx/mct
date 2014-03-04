@@ -203,7 +203,6 @@ public class DynamicMenuTest {
             return;
         }
 		ActionContextImpl context = new ActionContextImpl();
-		context.setTargetComponent(null);
 		
 		popupMenus.add(testMenu);
 		
@@ -255,7 +254,6 @@ public class DynamicMenuTest {
             return;
         }
 		ActionContextImpl context = new ActionContextImpl();
-		context.setTargetComponent(componentA);
 		
 		JPopupMenu popupMenu = MenuFactory.createPopupMenu(context, popupMenus);
 		Assert.assertNotNull(popupMenu);

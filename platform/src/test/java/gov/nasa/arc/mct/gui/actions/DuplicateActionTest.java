@@ -121,7 +121,7 @@ public final class DuplicateActionTest {
         NodeViewManifestation selectedNodeView = Mockito.mock(NodeViewManifestation.class);        
         NodeViewManifestation parentNodeView = Mockito.mock(NodeViewManifestation.class);        
         Mockito.when(actionContext.getTargetHousing()).thenReturn(housing);
-        Mockito.when(actionContext.getTargetComponent()).thenReturn(ac);
+        Mockito.when(actionContext.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class)).thenReturn(ac);
         Mockito.when(housing.getDirectoryArea()).thenReturn(directoryArea);
         Mockito.when(directoryArea.getSelectedManifestations()).thenReturn(Collections.<View>singleton(selectedNodeView));
         Mockito.when(directoryArea.getSelectedDirectoryNode()).thenReturn(selectedNode);

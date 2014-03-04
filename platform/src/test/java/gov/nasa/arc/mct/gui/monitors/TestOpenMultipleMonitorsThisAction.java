@@ -70,7 +70,7 @@ public class TestOpenMultipleMonitorsThisAction {
              }
 
             @Override
-            public AbstractComponent getTargetComponent() {
+            public <T> T getProperty(String key, Class<T> propertyClass) {
                 return null;
             }
          };

@@ -31,7 +31,9 @@ import gov.nasa.arc.mct.gui.housing.MCTHousing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JComponent;
@@ -43,30 +45,27 @@ import javax.swing.SwingUtilities;
  * @author nija.shi@nasa.gov
  */
 public class ActionContextImpl implements ActionContext {
+    public static class PropertyKeys {
+        /**
+         * Indicates the destination of an action (e.g. the drop location of 
+         * a drop operation).
+         * Property values for this key should be of type AbstractComponent.
+         */
+        public static final String TARGET_COMPONENT = "TARGET_COMPONENT"; // NOI18N
+        
+        /**
+         * Indicates the index for drop / reordering actions.
+         * Property values for this key should be of type Integer.
+         */
+        public static final String TARGET_INDEX = "TARGET_INDEX"; // NOI18N
+    }
     
-    private AbstractComponent targetComponent;
+    
     private Set<JComponent> targetViewComponents = new LinkedHashSet<JComponent>();
     private MCTHousing targetHousing;
     private Collection<View> selectedManifestations = new LinkedHashSet<View>();
     private AbstractComponent inspectorComponent;
-
-    /**
-     * Gets the target component for an action.
-     * 
-     * @return the target component
-     */
-    public AbstractComponent getTargetComponent() {
-        return targetComponent;
-    }
-
-    /**
-     * Sets the target component for an action.
-     * 
-     * @param targetComponent the new target component
-     */
-    public void setTargetComponent(AbstractComponent targetComponent) {
-        this.targetComponent = targetComponent;
-    }
+    private Map<String, Object> properties = new HashMap<String, Object>();
 
     /**
      * Gets the target view manifestation, a Swing component
@@ -162,5 +161,31 @@ public class ActionContextImpl implements ActionContext {
      */
     public void setInspectorComponent(AbstractComponent inspectorComponent) {
         this.inspectorComponent = inspectorComponent;
+    }
+
+    /**
+     * Associate a custom property with the current context.
+     * @param key a key indicating which property will be set
+     * @param value the new value for that property 
+     */
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+    
+    /**
+     * Set the target component for this context.
+     * @param component the target component
+     */
+    public void setTargetComponent(AbstractComponent component) {
+        setProperty(PropertyKeys.TARGET_COMPONENT, component);
+    }
+    
+    @Override
+    public <T> T getProperty(String key, Class<T> propertyClass) {
+        Object value = properties.get(key);
+        if (value != null && propertyClass.isAssignableFrom(value.getClass())) {
+            return propertyClass.cast(value);
+        }
+        return null;
     }
 }

@@ -377,7 +377,7 @@ public final class MenuFactory {
                 if (activeHousing != null) {
                     // An active housing may be missing in headless mode.
                     View currentActiveManifestation = activeHousing.getCurrentManifestation();                    
-                    context.setTargetComponent(currentActiveManifestation.getManifestedComponent());
+                    context.setProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, currentActiveManifestation.getManifestedComponent());
                     context.setTargetHousing(activeHousing);
                     
                     // Add all selected manifestations to context.

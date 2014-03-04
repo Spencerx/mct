@@ -70,7 +70,8 @@ public class TestExecutableButtonAction {
              }
 
 			@Override
-			public AbstractComponent getTargetComponent() {
+			public <T> T getProperty(String key, Class<T> propertyClass) {
+				// TODO Auto-generated method stub
 				return null;
 			}
          };

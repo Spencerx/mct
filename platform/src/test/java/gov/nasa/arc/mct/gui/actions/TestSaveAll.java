@@ -93,7 +93,6 @@ public class TestSaveAll {
         ActionContextImpl mockContext = Mockito.mock(ActionContextImpl.class);
 
         Mockito.when(mockContext.getInspectorComponent()).thenReturn(comp);
-        Mockito.when(mockContext.getTargetComponent()).thenReturn(comp);
         Mockito.when(mockContext.getTargetHousing()).thenReturn(mockHousing);
         Mockito.when(mockHousing.getContentArea()).thenReturn(mockContentArea);
         Mockito.when(mockContentArea.getHousedViewManifestation()).thenReturn(mockView);
@@ -151,7 +150,6 @@ public class TestSaveAll {
         ActionContextImpl mockContext = Mockito.mock(ActionContextImpl.class);
         
         Mockito.when(mockContext.getInspectorComponent()).thenReturn(comp);
-        Mockito.when(mockContext.getTargetComponent()).thenReturn(comp);
         Mockito.when(mockContext.getTargetHousing()).thenReturn(mockHousing);
         Mockito.when(mockHousing.getContentArea()).thenReturn(mockContentArea);
         Mockito.when(mockContentArea.getHousedViewManifestation()).thenReturn(mockView);
@@ -226,7 +224,6 @@ public class TestSaveAll {
         ActionContextImpl mockContext = Mockito.mock(ActionContextImpl.class);
         
         Mockito.when(mockContext.getInspectorComponent()).thenReturn(comp);
-        Mockito.when(mockContext.getTargetComponent()).thenReturn(comp);
         Mockito.when(mockContext.getTargetHousing()).thenReturn(mockHousing);
         Mockito.when(mockHousing.getContentArea()).thenReturn(mockContentArea);
         Mockito.when(mockContentArea.getHousedViewManifestation()).thenReturn(mockView);

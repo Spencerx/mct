@@ -136,7 +136,7 @@ public class DuplicateAction extends ContextAwareAction {
             }
         }
         
-        destinationComponent = actionContext.getTargetComponent();
+        destinationComponent = actionContext.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class);
         if (destinationComponent == null) {
             String destinationId = null;
             for (View view : actionContext.getSelectedManifestations()) {

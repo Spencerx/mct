@@ -21,6 +21,7 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.gui.menu.actions;
 
+import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
 import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
@@ -52,7 +53,7 @@ public class DoThisAction extends ContextAwareAction {
 
 	@Override
 	public boolean isEnabled() {
-		return (actionContext.getTargetComponent() != null);			
+		return ( actionContext.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class) != null);			
 	}
 
 }

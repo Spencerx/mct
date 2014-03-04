@@ -21,8 +21,6 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.gui;
 
-import gov.nasa.arc.mct.components.AbstractComponent;
-
 import java.util.Collection;
 
 /**
@@ -50,14 +48,12 @@ public interface ActionContext {
     public Collection<View> getRootManifestations();
     
     /**
-     * This method returns the component which is targeted by the action.
-     * For actions with a source and a destination (e.g. drag an drop), 
-     * this is the destination component.
-     * If there is no such action, this will return null.
-     * Note that this is not the selected object; 
-     * {@link ActionContext#getSelectedManifestations} should be used 
-     * to retrieve selections.
-     * @return the component targeted by this action
+     * Get a non-standard property associated with this action 
+     * context. Return value shall be null if this property has 
+     * not been assigned.
+     * @param key a key indicating the desired property
+     * @param propertyClass desired return type
+     * @return the value of that property, or null if unassigned
      */
-    public AbstractComponent getTargetComponent();
+    public <T> T getProperty (String key, Class<T> propertyClass); 
 }

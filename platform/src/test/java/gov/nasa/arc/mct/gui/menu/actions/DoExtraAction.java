@@ -55,7 +55,7 @@ public class DoExtraAction extends ContextAwareAction {
 	@Override
 	public boolean canHandle(ActionContext context) {
 		actionContext = (ActionContextImpl) context;
-		AbstractComponent targetComponent = actionContext.getTargetComponent();
+		AbstractComponent targetComponent = actionContext.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class);
 		if (targetComponent == null)
 		    putValue(Action.SELECTED_KEY, false);
 		else
@@ -65,7 +65,7 @@ public class DoExtraAction extends ContextAwareAction {
 
 	@Override
 	public boolean isEnabled() {
-		AbstractComponent targetComponent = actionContext.getTargetComponent();
+		AbstractComponent targetComponent = actionContext.getProperty(ActionContextImpl.PropertyKeys.TARGET_COMPONENT, AbstractComponent.class);
 		return (targetComponent == null) ? false : "My Model A".equals(targetComponent.getDisplayName());  
 	}
 
