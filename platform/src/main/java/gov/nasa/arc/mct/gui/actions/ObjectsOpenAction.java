@@ -69,15 +69,20 @@ public class ObjectsOpenAction extends ContextAwareAction {
     @Override
     public boolean isEnabled() {
         MCTHousing targetHousing = actionContext.getTargetHousing();
-        if (targetHousing == null)
+        if (targetHousing == null) {
             return false;
+        }
         
-        AbstractComponent targetComponent = actionContext.getTargetComponent();
-        if (targetComponent == null)
+        if (actionContext.getSelectedManifestations() == null || 
+            actionContext.getSelectedManifestations().isEmpty()) {
             return false;
+        }
         
-        if (targetComponent.equals(targetHousing.getWindowComponent()))
-            return false;
+        for (View view : actionContext.getSelectedManifestations()) {
+            if (view.getManifestedComponent().equals(targetHousing.getWindowComponent())) {
+                return false;
+            }
+        }
         
         return true;
     }

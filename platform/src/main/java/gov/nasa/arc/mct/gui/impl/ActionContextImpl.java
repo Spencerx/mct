@@ -56,12 +56,6 @@ public class ActionContextImpl implements ActionContext {
      * @return the target component
      */
     public AbstractComponent getTargetComponent() {
-        if (targetComponent == null) {
-            if (selectedManifestations.isEmpty())
-                return targetHousing != null ? targetHousing.getWindowComponent() : null;
-            else
-                return selectedManifestations.iterator().next().getManifestedComponent(); 
-        }
         return targetComponent;
     }
 

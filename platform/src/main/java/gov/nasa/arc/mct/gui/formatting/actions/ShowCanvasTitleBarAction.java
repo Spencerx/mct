@@ -21,7 +21,6 @@
  *******************************************************************************/
 package gov.nasa.arc.mct.gui.formatting.actions;
 
-import gov.nasa.arc.mct.components.AbstractComponent;
 import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareAction;
 import gov.nasa.arc.mct.gui.housing.MCTHousing;
@@ -55,9 +54,10 @@ public class ShowCanvasTitleBarAction extends ContextAwareAction {
     public boolean canHandle(ActionContext context) {
         actionContext = (ActionContextImpl) context;
         
-        AbstractComponent component = actionContext.getTargetComponent();        
-        if (component == null)
+        if (actionContext.getSelectedManifestations() == null || 
+            actionContext.getSelectedManifestations().isEmpty()) {
             return false;
+        }
 
         MCTHousing targetHousing = actionContext.getTargetHousing();
         if (targetHousing == null || targetHousing.getContentArea() == null)

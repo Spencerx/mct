@@ -129,20 +129,23 @@ public class OpenMultipleMonitorsObjectsAction extends CompositeAction {
 
     @Override
     public boolean isEnabled() {
-        boolean checkTargetComponent =  false;
-        boolean checkTargetHousing = false;
-        
         MCTHousing targetHousing = actionContext.getTargetHousing();
-        checkTargetHousing = (targetHousing == null) ? false : true;
+        if (targetHousing == null) {
+            return false;
+        }
         
-        AbstractComponent targetComponent = actionContext.getTargetComponent();
-        checkTargetComponent = (targetComponent == null) ? false : true; 
+        if (actionContext.getSelectedManifestations() == null || 
+            actionContext.getSelectedManifestations().isEmpty()) {
+            return false;
+        }
         
-        if (targetComponent.equals(targetHousing.getWindowComponent()))
-            checkTargetComponent = false;
-         
-        return (checkTargetComponent && checkTargetHousing &&
-                (DetectGraphicsDevices.getInstance().getNumberGraphicsDevices() > DetectGraphicsDevices.MINIMUM_MONITOR_CHECK));
+        for (View view : actionContext.getSelectedManifestations()) {
+            if (view.getManifestedComponent().equals(targetHousing.getWindowComponent())) {
+                return false;
+            }
+        }
+        
+        return (DetectGraphicsDevices.getInstance().getNumberGraphicsDevices() > DetectGraphicsDevices.MINIMUM_MONITOR_CHECK);
     }
  
 }

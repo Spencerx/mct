@@ -40,9 +40,8 @@ public class LinkAction extends ContextAwareAction {
     private AbstractComponent targetComponent = null;
     private Collection<AbstractComponent> sourceComponents = new ArrayList<AbstractComponent>();
     
-    public LinkAction(AbstractComponent destination) {
+    public LinkAction() {
         super("Link");
-        this.targetComponent = destination;
     }
 
     @Override
@@ -51,6 +50,7 @@ public class LinkAction extends ContextAwareAction {
         for (View view : context.getSelectedManifestations()) {
             sourceComponents.add(view.getManifestedComponent());
         }
+        targetComponent = context.getTargetComponent();
         return compositionIsAllowed(); 
     }
 

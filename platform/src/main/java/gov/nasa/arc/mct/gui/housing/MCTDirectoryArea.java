@@ -535,9 +535,9 @@ public class MCTDirectoryArea extends View implements ViewProvider, SelectionPro
             }
             
             for (ContextAwareAction a : new ContextAwareAction[] {
-                    new MoveAction(targetComponent),
-                    new LinkAction(targetComponent),
-                    new DuplicateAction(targetComponent)
+                    new MoveAction(),
+                    new LinkAction(),
+                    new DuplicateAction(true)
             }) {
                 if (a.canHandle(actionContext) && a.isEnabled()) {
                     String name = a.getValue(Action.NAME).toString();

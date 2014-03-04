@@ -57,13 +57,17 @@ public class DuplicateAction extends ContextAwareAction {
     private AbstractComponent destinationComponent = null;
     
     public DuplicateAction() {
-        super(TEXT);
-    }
-    
-    public DuplicateAction(AbstractComponent destination) {
-        super(SHORT_TEXT);
-        destinationComponent = destination;
-    }
+        this(false);
+    }    
+
+    /**
+     * Duplicate object has a shorter name when appearing in a 
+     * dialog box.
+     * @param useShortText true if short name should be used
+     */
+    public DuplicateAction(boolean useShortText) {
+        super(useShortText ? SHORT_TEXT : TEXT);
+    }    
     
     @AfterMethod
     protected void teardown() {
@@ -132,6 +136,7 @@ public class DuplicateAction extends ContextAwareAction {
             }
         }
         
+        destinationComponent = actionContext.getTargetComponent();
         if (destinationComponent == null) {
             String destinationId = null;
             for (View view : actionContext.getSelectedManifestations()) {

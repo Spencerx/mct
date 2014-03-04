@@ -34,15 +34,27 @@ import java.util.List;
 
 import javax.swing.Action;
 
+/**
+ * This action describes a move of components from 
+ * one location to another. This is equivalent to an
+ * "add manifestation" in the new location, and a 
+ * "remove manifestation" in the old location.
+ */
 public class MoveAction extends ContextAwareAction {
     private static final long serialVersionUID = -3683849461079613041L;
 
     private ContextAwareAction[] actions;
     
-    public MoveAction(AbstractComponent destination) {
+    /**
+     * Create a new instance of the move action. 
+     * Components moved will arrive in the specified 
+     * destination.
+     * @param destination the destination of the move action
+     */
+    public MoveAction() {
         super("Move");
         actions = new ContextAwareAction[]{
-                new LinkAction(destination),
+                new LinkAction(),
                 new TransactionalRemoveAction()                
         };
     }

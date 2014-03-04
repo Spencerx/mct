@@ -26,7 +26,6 @@ import gov.nasa.arc.mct.gui.ActionContext;
 import gov.nasa.arc.mct.gui.ContextAwareMenu;
 import gov.nasa.arc.mct.gui.MenuItemInfo;
 import gov.nasa.arc.mct.gui.MenuItemInfo.MenuItemType;
-import gov.nasa.arc.mct.gui.impl.ActionContextImpl;
 import gov.nasa.arc.mct.policy.PolicyContext;
 import gov.nasa.arc.mct.policy.PolicyInfo;
 import gov.nasa.arc.mct.policymgr.PolicyManagerImpl;
@@ -45,20 +44,24 @@ public class NewMenu extends ContextAwareMenu {
 
     @Override
     public boolean canHandle(ActionContext context) {
-        ActionContextImpl actionContext = (ActionContextImpl) context;
         // For now, this New submenu should only appear when there are external bundles
         ExternalComponentRegistryImpl extCompRegistry = ExternalComponentRegistryImpl.getInstance();
         Collection<ExtendedComponentTypeInfo> componentInfos = extCompRegistry.getComponentInfos();
         if (componentInfos.isEmpty())
             return false;
+        
+        if (context.getSelectedManifestations() == null || context.getSelectedManifestations().size() != 1) {
+            return false;
+        }
 
-        AbstractComponent targetComponent = actionContext.getTargetComponent();
+        AbstractComponent targetComponent = context.getSelectedManifestations().iterator().next().getManifestedComponent();
         PolicyContext policyContext = new PolicyContext();
         policyContext.setProperty(PolicyContext.PropertyName.TARGET_COMPONENT.getName(), targetComponent);
         policyContext.setProperty(PolicyContext.PropertyName.ACTION.getName(), 'w');
         String compositionKey = PolicyInfo.CategoryType.COMPOSITION_POLICY_CATEGORY.getKey();
         return PolicyManagerImpl.getInstance().execute(compositionKey, policyContext).getStatus();
     }
+    
     @Override
     protected void populate() {
         addMenuItemInfos("", Collections.<MenuItemInfo>singleton(new MenuItemInfo("OBJECTS_NEW_ACTION", MenuItemType.COMPOSITE)));

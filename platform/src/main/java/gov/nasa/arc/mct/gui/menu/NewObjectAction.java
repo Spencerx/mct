@@ -71,7 +71,12 @@ public class NewObjectAction extends CompositeAction {
     @Override
     public boolean canHandle(ActionContext context) {
         actionContext = (ActionContextImpl) context;
-        AbstractComponent targetComponent = actionContext.getTargetComponent();
+        
+        if (context.getSelectedManifestations() == null || context.getSelectedManifestations().size() != 1) {
+            return false;
+        }
+
+        AbstractComponent targetComponent = context.getSelectedManifestations().iterator().next().getManifestedComponent();
         ExternalComponentRegistryImpl extCompRegistry = ExternalComponentRegistryImpl.getInstance();
         Collection<ExtendedComponentTypeInfo> componentInfos = extCompRegistry.getComponentInfos();
 

@@ -50,8 +50,14 @@ public interface ActionContext {
     public Collection<View> getRootManifestations();
     
     /**
-     * 
-     * @return
+     * This method returns the component which is targeted by the action.
+     * For actions with a source and a destination (e.g. drag an drop), 
+     * this is the destination component.
+     * If there is no such action, this will return null.
+     * Note that this is not the selected object; 
+     * {@link ActionContext#getSelectedManifestations} should be used 
+     * to retrieve selections.
+     * @return the component targeted by this action
      */
     public AbstractComponent getTargetComponent();
 }
