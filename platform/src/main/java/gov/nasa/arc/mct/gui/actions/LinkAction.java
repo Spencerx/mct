@@ -34,6 +34,11 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * Represents the Add Manifestation action; adds references to 
+ * selected components to a target component.
+ * Used for drag-and-drop in the directory area.
+ */
 public class LinkAction extends ContextAwareAction {
     private static final long serialVersionUID = -3683849461079613041L;
 
