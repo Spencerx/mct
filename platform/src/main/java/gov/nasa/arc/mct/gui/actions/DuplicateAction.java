@@ -113,7 +113,7 @@ public class DuplicateAction extends ContextAwareAction {
 
     protected boolean isComponentCreatable(AbstractComponent ac) {
         ExternalComponentRegistryImpl extCompRegistry = ExternalComponentRegistryImpl.getInstance();
-        return extCompRegistry.isCreatable(ac.getClass());
+        return ac != null && extCompRegistry != null && extCompRegistry.isCreatable(ac.getClass());
     }
     
     @Override

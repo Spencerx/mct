@@ -36,6 +36,7 @@ import gov.nasa.arc.mct.gui.ViewRoleSelection;
 import gov.nasa.arc.mct.platform.spi.PersistenceProvider;
 import gov.nasa.arc.mct.platform.spi.Platform;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
+import gov.nasa.arc.mct.platform.spi.WindowManager;
 import gov.nasa.arc.mct.policy.ExecutionResult;
 import gov.nasa.arc.mct.policy.PolicyContext;
 import gov.nasa.arc.mct.services.component.PolicyManager;
@@ -52,6 +53,7 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
@@ -78,19 +80,23 @@ public class MCTDirectoryAreaTransferHandlerTest {
     @Mock private DefaultTreeModel model;
     @Mock private Platform mockPlatform;
     @Mock private PolicyManager mockPolicyManager;
+    @Mock private WindowManager mockWindowManager;
 
     private MCTDirectoryArea dir;
-    private StubbedHandler handler;
+    private MCTDirectoryArea.DirectoryTreeTransferHandler handler;
     
     @BeforeMethod
     public void init() {
         MockitoAnnotations.initMocks(this);
         dir = new MCTDirectoryArea();
-        handler = new StubbedHandler(dir, tree, model);
+        handler = new MCTDirectoryArea.DirectoryTreeTransferHandler (dir, model);
         (new PlatformAccess()).setPlatform(mockPlatform);
         when(mockPlatform.getPolicyManager()).thenReturn(mockPolicyManager);
+        when(mockPlatform.getWindowManager()).thenReturn(mockWindowManager);
         ExecutionResult result = new ExecutionResult(new PolicyContext(), true, "mock");
         when(mockPolicyManager.execute(Mockito.anyString(), Mockito.any(PolicyContext.class))).thenReturn(result);
+        when(mockWindowManager.<String>showInputDialog(Mockito.anyString(), Mockito.anyString(), Mockito.<String[]>any(), Mockito.anyString(), Mockito.<Map<String,Object>>any()))
+            .thenReturn("Link");
      }
     
     @AfterMethod
@@ -213,11 +219,11 @@ public class MCTDirectoryAreaTransferHandlerTest {
 
         View targetView = mock(View.class);
         MCTMutableTreeNode target = createMockNode(targetView);
-        AbstractComponent targetComponent = mock(AbstractComponent.class);
+        AbstractComponent targetComponent = new AbstractComponent(){};
         when(targetView.getManifestedComponent()).thenReturn(targetComponent);
         
         View mockView = mock(View.class);
-        AbstractComponent mockComponent = mock(AbstractComponent.class);
+        AbstractComponent mockComponent = new AbstractComponent(){};
         when(mockView.getManifestedComponent()).thenReturn(mockComponent);
         
         when(transferable.getTransferData(eq(GOOD_FLAVOR))).thenReturn(new View[]{mockView});
@@ -233,9 +239,12 @@ public class MCTDirectoryAreaTransferHandlerTest {
         Mockito.when(mockPlatform.getPolicyManager()).thenReturn(mockPolicyManager);        
         ExecutionResult mockResult = new ExecutionResult(new PolicyContext(), true, "");
         Mockito.when(mockpoPolicyManager.execute(Mockito.anyString(), Mockito.any(PolicyContext.class))).thenReturn(mockResult);
+        when(mockPlatform.getWindowManager()).thenReturn(mockWindowManager);
+        when(mockWindowManager.<String>showInputDialog(Mockito.anyString(), Mockito.anyString(), Mockito.<String[]>any(), Mockito.anyString(), Mockito.<Map<String,Object>>any()))
+            .thenReturn("Link");
         
         handler.internalImport(support, target, new TreePath(target), childIndex);
-        Assert.assertEquals(handler.getDelegates(),Collections.singleton(mockComponent));
+        Assert.assertEquals(targetComponent.getComponents(),Collections.singleton(mockComponent));
     }
     
     @DataProvider(name="importTests")
@@ -253,7 +262,7 @@ public class MCTDirectoryAreaTransferHandlerTest {
         View rootView = mock(View.class);
         MCTMutableTreeNode root = createMockNode(rootView);
         when(model.getRoot()).thenReturn(root);
-        AbstractComponent rootComponent = Mockito.mock(AbstractComponent.class);
+        AbstractComponent rootComponent = new AbstractComponent(){};
         Mockito.when(rootView.getManifestedComponent()).thenReturn(rootComponent);
 
         DataFlavor[] flavors = new DataFlavor[]{GOOD_FLAVOR};
@@ -278,30 +287,14 @@ public class MCTDirectoryAreaTransferHandlerTest {
         Mockito.when(mockPlatform.getPolicyManager()).thenReturn(mockPolicyManager);        
         ExecutionResult mockResult = new ExecutionResult(new PolicyContext(), true, "");
         Mockito.when(mockpoPolicyManager.execute(Mockito.anyString(), Mockito.any(PolicyContext.class))).thenReturn(mockResult);
-
+        when(mockPlatform.getWindowManager()).thenReturn(mockWindowManager);
+        when(mockWindowManager.<String>showInputDialog(Mockito.anyString(), Mockito.anyString(), Mockito.<String[]>any(), Mockito.anyString(), Mockito.<Map<String,Object>>any()))
+            .thenReturn("Link");
+        
         handler.internalImport(support, root, new TreePath(root), childIndex);
         
         // Verify that the tree model root structure changed.
         verify(model).nodeStructureChanged(root);
     }
-    
-    private static class StubbedHandler extends MCTDirectoryArea.DirectoryTreeTransferHandler {
-        private static final long serialVersionUID = 1L;
-        private List<AbstractComponent> delegatesInvoked;
-    	
-    	public StubbedHandler(MCTDirectoryArea dir, JTree tree, DefaultTreeModel model) {
-    		super(dir, model);
-    	}
-    	
-    	public List<AbstractComponent> getDelegates() {
-    		return delegatesInvoked;
-    	}
-    	
-    	@Override
-    	protected void addDelegateComponents(AbstractComponent component, List<AbstractComponent> delegates,
-    	        int childIndex) {
-    	    delegatesInvoked = delegates;
-    	}
-    }    
     
 }

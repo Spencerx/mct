@@ -45,6 +45,7 @@ import gov.nasa.arc.mct.gui.impl.WindowManagerImpl;
 import gov.nasa.arc.mct.gui.menu.MenuFactory;
 import gov.nasa.arc.mct.gui.util.GUIUtil;
 import gov.nasa.arc.mct.platform.spi.PlatformAccess;
+import gov.nasa.arc.mct.platform.spi.WindowManager;
 import gov.nasa.arc.mct.policy.ExecutionResult;
 import gov.nasa.arc.mct.policy.PolicyContext;
 import gov.nasa.arc.mct.policy.PolicyInfo;
@@ -549,7 +550,11 @@ public class MCTDirectoryArea extends View implements ViewProvider, SelectionPro
             Map<String, Object> hints = new HashMap<String, Object>();
             hints.put(WindowManagerImpl.OPTION_TYPE, OptionBox.DEFAULT_OPTION);
             
-            String actionName = PlatformAccess.getPlatform().getWindowManager().showInputDialog("Select action", "", options, options[0], hints);
+            WindowManager windowing = PlatformAccess.getPlatform().getWindowManager();
+            String actionName =
+                    options.length > 0 && windowing != null ?
+                    windowing.showInputDialog("Select action", "", options, options[0], hints) :
+                    null;
             
             if (actionName != null) {
                 actions.get(actionName).actionPerformed(null);
