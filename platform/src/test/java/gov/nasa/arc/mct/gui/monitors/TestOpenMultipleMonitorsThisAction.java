@@ -68,6 +68,11 @@ public class TestOpenMultipleMonitorsThisAction {
              public Collection<View> getRootManifestations() {
                  return Collections.emptySet();
              }
+
+            @Override
+            public AbstractComponent getTargetComponent() {
+                return null;
+            }
          };
          
          return context;

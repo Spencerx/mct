@@ -113,6 +113,11 @@ public class ExportActionTest {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+		@Override
+		public AbstractComponent getTargetComponent() {
+			return null;
+		}
 		
 	}
 	
