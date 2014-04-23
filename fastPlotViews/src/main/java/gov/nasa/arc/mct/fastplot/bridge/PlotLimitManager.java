@@ -285,6 +285,20 @@ public class PlotLimitManager implements ActionListener {
 		}
 	}	
 	
+	/**
+	 * Collapse any boundaries that have been expanded. This 
+	 * is necessary to avoid undefinable behavior for translucent
+	 * purple arrows.
+	 */
+	protected void collapseBoundaries() {
+		if (nonTimeMaxAlarm == LimitAlarmState.ALARM_OPENED_BY_USER) {
+			processMaxAlertButtonPress();
+		}
+		if (nonTimeMinAlarm == LimitAlarmState.ALARM_OPENED_BY_USER) {
+			processMinAlertButtonPress();
+		}
+	}
+	
 	private void updateLimitButtons() {
 		if (nonTimeMaxAlarm == LimitAlarmState.ALARM_RAISED	) {
 			setMaxAlarmIconToAlarmRaised();

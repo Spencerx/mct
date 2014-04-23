@@ -81,6 +81,11 @@ public class PanAndZoomManager {
 
 	
 	public void panAction(PanDirection panningAction) {
+		
+		// Collapse any active boundary arrows
+		// This is necessary to avoid nasa/mct#279
+		plot.getLimitManager().collapseBoundaries();
+		
 		XYAxis xAxis = plot.getPlotView().getXAxis();
 		XYAxis yAxis = plot.getPlotView().getYAxis();
 		if (plot.getAxisOrientationSetting() == AxisOrientationSetting.X_AXIS_AS_TIME) {
